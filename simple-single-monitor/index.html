@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Monitor Plots</title>
+
+	<!-- Load Bootstrap -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+	integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+	<style type="text/css">
+		body {
+			display: flex;
+			flex-direction: row;
+			align-items: stretch;
+			background-color: WhiteSmoke;
+		}
+
+		h1 {
+			font-size: 32px;
+			text-align: center;
+		}
+
+		fieldset {
+			margin-bottom: 20px;
+		}
+
+		input {
+			margin-bottom: 5px;
+		}
+
+		input[type="text"] {
+    		width: 100%;
+		}
+
+		label {
+			font-weight: bold;
+		}
+
+		#sidebar {
+			width: 280px;
+			display: flex;
+			flex-direction: column;
+			padding: 10px 20px;
+			background-color: White;
+			border-bottom-right-radius: 20px;
+			box-shadow: 0px 0px 10px gray;
+		}
+
+		#inputs {
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+		}
+
+		#plot-view {
+			flex-grow: 1;
+			height: 100vh;
+			padding: 40px 40px;
+			position: relative;
+		}
+
+		#plot-container {
+			height: 100%;
+			margin: auto;
+			position: relative;
+		}
+
+		#plot-image {
+			width: 700px;
+			height: 700px;
+			margin: auto;
+			/* Responsive
+			max-width: 100%;
+			max-height: 100%;
+			*/
+			box-shadow: 0px 0px 10px gray;
+		}
+
+		#loading-spinner {
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			width: 100px;
+			height: 100px;
+			transform-origin: 0% 0%;
+			border: 12px solid WhiteSmoke;
+			border-top: 12px solid CornflowerBlue;
+			border-radius: 50%;
+			animation: spin 0.45s linear infinite;
+			-webkit-animation: spin 0.45s linear infinite; /* Safari */
+		}
+
+		.radio-label {
+			font-weight: normal;
+		}
+
+		.visible {
+			display: block;
+		}
+
+		.invisible {
+			display: none;
+		}
+
+		@media screen and (max-width: 1000px) {
+			body {
+				flex-direction: column;
+			}
+
+			fieldset {
+				margin-left: 10px;
+				margin-right: 10px;
+				margin-bottom: 0px;
+			}
+
+			#sidebar {
+				width: 100%;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				flex-wrap: wrap;
+				border-bottom-right-radius: 10px;
+				border-bottom-right-radius: 10px;
+			}
+
+			#inputs {
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+
+			#daterange {
+				width: 100%;
+			}
+
+			#plot-view {
+				padding: 20px 20px;
+			}
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg) translate(-50%, -50%); }
+			100% { transform: rotate(360deg) translate(-50%, -50%); }
+		}
+
+		/* Safari */
+		@-webkit-keyframes spin {
+			0% { -webkit-transform: rotate(0deg) translate(-50%, -50%); }
+			100% { -webkit-transform: rotate(360deg) translate(-50%, -50%); }
+		}
+	</style>
+</head>
+
+<body>
+	<div id="sidebar">
+		<div>
+			<h1>Monitor Plots</h1>
+		</div>
+
+		<hr>
+
+		<div id="inputs">
+			<!-- Plot type input -->
+			<fieldset id="plot-type-list">
+				<label>Plot type</label>
+				<br>
+				<input type="radio" name="plot-type" value="dailybarplot" checked>
+ 				<label class="radio-label">Daily average</label>
+ 				<br>
+ 				<input type="radio" name="plot-type" value="dailybyhour">
+ 				<label class="radio-label">Time of day</label>
+ 				<br>
+ 				<input type="radio" name="plot-type" value="timeseries">
+ 				<label class="radio-label">Time series</label>
+			</fieldset>
+
+			<!-- Monitor ID input -->
+			<fieldset>
+				<label for="monitorId">Monitor ID</label>
+				<br>
+				<input id="monitorId" type="text" name="monitorId">
+			</fieldset>
+
+			<!-- Time range input -->
+			<fieldset>
+				<label >Date range</label>
+				<input id="daterange" type="text" name="daterange" value=""/>
+			</fieldset>	
+		</div>
+	</div>
+
+	<div id="plot-view">
+		<div id="plot-container">
+			<img id="plot-image" src="" class="invisible">
+			<div id="loading-spinner" class="invisible"></div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$(function() {
+			$("input[name=daterange]").daterangepicker({
+				opens: "left"
+			}, function(start, end, label) {
+				
+			});
+
+			$("#monitorId").change(function() {
+				generatePlot();
+			});
+
+			$("input[type=radio][name=plot-type]").change(function() {
+			    generatePlot();
+			});
+
+			$("input[name=daterange]").change(function() {
+				generatePlot();
+			});
+
+			/**
+			 * Triggers when the plot image loads.
+			 */
+			document.getElementById("plot-image").onload = function() {
+				// Hide loading spinner
+				$("#loading-spinner").removeClass("visible");
+				$("#loading-spinner").addClass("invisible");
+
+				// Show plot image
+				$("#plot-image").removeClass("invisible");
+				$("#plot-image").addClass("visible");
+			}
+
+			function generatePlot() {
+				// Get user input parameters
+				let plotType  = $("input[name=plot-type]:checked").val();
+				let monitorId = $("#monitorId").val();
+				let dateRange = $("input[name=daterange]").val().split(" - ");
+
+				// Convert format of input date range
+				let startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
+				let endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
+
+				// Build plot request URL
+				let requestURL = "https://tools.airfire.org/monitor-plot/v4/plot?" + 
+					"databaseversion=4.0&webserviceapi=4.0" + 
+					"&plottype="  + plotType + 
+					"&monitorid=" + monitorId + 
+					"&startdate=" + startDate +
+					"&enddate="   + endDate;
+
+				// Update plot image source
+				$("#plot-image").attr("src", requestURL);
+
+				// Show loading spinner
+				$("#loading-spinner").removeClass("invisible");
+				$("#loading-spinner").addClass("visible");
+
+				// Hide plot image
+				$("#plot-image").removeClass("visible");
+				$("#plot-image").addClass("invisible");
+
+				/*
+				Access to fetch at requestURL from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
+
+				fetch(requestURL + "&responsetype=json", { mode: 'cors' })
+					.then(response => response.json())
+					.then(data => {
+					})
+					.catch(error => {
+						console.log(error);
+					});
+				*/
+
+				console.log(requestURL);
+			}
+		});
+	</script>
+</body>
+</html>
