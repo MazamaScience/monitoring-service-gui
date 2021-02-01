@@ -78,12 +78,14 @@
 		  padding: 10px 10px;
 		}
 	
-	  #instructions li, p {
+	  #instructions li {
 	    font-size: 14px;
 		  font-style: italic;
 	  }
 	  
 	  #instructions p {
+	    font-size: 14px;
+		  font-style: italic;
 	    text-align: center;
 	    color: Gray;
 	  }
@@ -124,6 +126,18 @@
 			border-radius: 50%;
 			animation: spin 0.45s linear infinite;
 			-webkit-animation: spin 0.45s linear infinite; /* Safari */
+		}
+		
+		#error-box {
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+			max-width: 500px;
+			height: 100px;
+			margin: auto;
+			padding: 10px;
+			border: 1px solid Red;
+			background-color: #ffe3e3;
+			text-align: center;
 		}
 
 		.radio-label {
@@ -249,6 +263,9 @@
 		<div id="plot-container">
 			<img id="plot-image" src="" class="invisible">
 			<div id="loading-spinner" class="invisible"></div>
+			<div id="error-box" class="invisible">
+			  <p id="error-message">Hello there</p>
+			</div>
 		</div>
 	</div>
 
@@ -261,7 +278,23 @@
 			});
 
 			$("#monitorId").change(function() {
-				generatePlot();
+			  const monitorIdRegex = /^[0-9]+_[0-9]*$/;
+			  const monitorId = $("#monitorId").val();
+			  
+			  $("#error-box").removeClass("visible");
+				$("#error-box").addClass("invisible");
+			  
+			  if (monitorIdRegex.test(monitorId)) {
+			    generatePlot();
+			  } else {
+			    const errorMessage = "Input monitor ID '" + monitorId + "' is not in proper format 'aqsID_instrumentID'\nex. '010890014_01'"
+			    $("#error-message").text(errorMessage);
+			    
+  				$("#error-box").removeClass("invisible");
+  				$("#error-box").addClass("visible");
+  				
+			    console.log(errorMessage);
+			  }
 			});
 
 			$("input[type=radio][name=plot-type]").change(function() {
