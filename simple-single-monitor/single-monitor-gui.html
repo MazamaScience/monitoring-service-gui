@@ -136,9 +136,16 @@
 			height: 100px;
 			margin: auto;
 			padding: 10px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
 			border: 1px solid Red;
 			background-color: #ffe3e3;
 			text-align: center;
+		}
+		
+		#error-box p {
+		  margin: 0px;
 		}
 
 		.radio-label {
@@ -273,42 +280,57 @@
 
 	<script type="text/javascript">
 		$(function() {
+		  /**
+		   * Open the date input field as a DateRangerPicker widget.
+		   */
 			$("input[name=daterange]").daterangepicker({
 				opens: "left"
-			}, function(start, end, label) {
-				
-			});
+			}, function(start, end, label) { });
 
+      /**
+       * React when a monitor ID is entered. 
+       */
 			$("#monitorId").change(function() {
 			  const monitorIdRegex = /^[0-9]+_[0-9]*$/;
 			  const monitorId = $("#monitorId").val();
 			  
+			  // Hide the error box
 			  $("#error-box").removeClass("visible");
 				$("#error-box").addClass("invisible");
 			  
+			  // Check if the input monitor ID matches the correct format.
+			  // If so, continue generating the plot.
+			  // Otherwise, inform the user with an error message.
 			  if (monitorIdRegex.test(monitorId)) {
-			    generatePlot();
+			    updatePlot();
 			  } else {
-			    const errorMessage = "Input monitor ID '" + monitorId + "' is not in proper format 'aqsID_instrumentID'\nex. '010890014_01'"
-			    $("#error-message").text(errorMessage);
+			    // Set error box message
+			    $("#error-message").text(
+			      "ERROR: The input monitor ID: '" + monitorId + "' is not in the format 'aqsID_instrumentID'\nex. '010890014_01'"
+			    );
 			    
+			    // Show error box
   				$("#error-box").removeClass("invisible");
   				$("#error-box").addClass("visible");
-  				
-			    console.log(errorMessage);
 			  }
 			});
 
+      /**
+       * React when a plot type is selected.
+       */
 			$("input[type=radio][name=plot-type]").change(function() {
-			    generatePlot();
+			    updatePlot();
 			});
 
+      /**
+       * React when a date range is entered.
+       */
 			$("input[name=daterange]").change(function() {
-				generatePlot();
+				updatePlot();
 			});
 
 			/**
-			 * Triggers when the plot image loads.
+			 * React when the plot image loads.
 			 */
 			document.getElementById("plot-image").onload = function() {
 				// Hide loading spinner
@@ -319,9 +341,23 @@
 				$("#plot-image").removeClass("invisible");
 				$("#plot-image").addClass("visible");
 			}
+			
+			/**
+			 * Builds a plot request and sets the plot image to the resulting URL. 
+			 */
+			function updatePlot() {
+			  const plotRequestURL = buildPlotRequestURL();
+			  
+			  console.log(plotRequestURL);
+			  
+			  updatePlotSource(plotRequestURL);
+			}
 
-			function generatePlot() {
-				// Get user input parameters
+      /**
+       * Builds a request to the plot service API using form input.
+       */
+			function buildPlotRequestURL() {
+				// Get form input
 				const plotType  = $("input[name=plot-type]:checked").val();
 				const monitorId = $("#monitorId").val();
 				const dateRange = $("input[name=daterange]").val().split(" - ");
@@ -331,26 +367,21 @@
 				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
 
 				// Build plot request URL
-				const requestURL = "https://tools.airfire.org/monitor-plot/v4/plot?" + 
+				const plotRequestURL = 
+				  "https://tools.airfire.org/monitor-plot/v4/plot?" + 
 					"databaseversion=4.0&webserviceapi=4.0" + 
 					"&plottype="  + plotType + 
 					"&monitorid=" + monitorId + 
 					"&startdate=" + startDate +
 					"&enddate="   + endDate;
 
-				// Update plot image source
-				$("#plot-image").attr("src", requestURL);
-
-				// Show loading spinner
-				$("#loading-spinner").removeClass("invisible");
-				$("#loading-spinner").addClass("visible");
-
-				// Hide plot image
-				$("#plot-image").removeClass("visible");
-				$("#plot-image").addClass("invisible");
-
 				/*
-				Access to fetch at requestURL from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
+				// Request the JSON response as well to check for server-side errors
+				
+				Access to fetch at requestURL from origin 'null' has been blocked by 
+				CORS policy: No 'Access-Control-Allow-Origin' header is present on the 
+				requested resource. If an opaque response serves your needs, set the 
+				request's mode to 'no-cors' to fetch the resource with CORS disabled.
         
 				fetch(requestURL + "&responsetype=json", { mode: 'cors' })
 					.then(response => response.json())
@@ -362,7 +393,24 @@
 					});
 				*/
 				
-				console.log(requestURL);
+				return plotRequestURL;
+			}
+			
+			/**
+			 * Sets the plot image's source URL and hides the plot and shows the 
+			 * loading spinner.
+			 */
+			function updatePlotSource(plotRequestURL) {
+			  // Update plot image source
+				$("#plot-image").attr("src", plotRequestURL);
+				
+				// Hide plot image
+				$("#plot-image").removeClass("visible");
+				$("#plot-image").addClass("invisible");
+
+				// Show loading spinner
+				$("#loading-spinner").removeClass("invisible");
+				$("#loading-spinner").addClass("visible");
 			}
 		});
 	</script>
