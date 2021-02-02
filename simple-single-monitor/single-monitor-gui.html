@@ -322,16 +322,16 @@
 
 			function generatePlot() {
 				// Get user input parameters
-				let plotType  = $("input[name=plot-type]:checked").val();
-				let monitorId = $("#monitorId").val();
-				let dateRange = $("input[name=daterange]").val().split(" - ");
+				const plotType  = $("input[name=plot-type]:checked").val();
+				const monitorId = $("#monitorId").val();
+				const dateRange = $("input[name=daterange]").val().split(" - ");
 
 				// Convert format of input date range
-				let startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
-				let endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
+				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
+				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
 
 				// Build plot request URL
-				let requestURL = "https://tools.airfire.org/monitor-plot/v4/plot?" + 
+				const requestURL = "https://tools.airfire.org/monitor-plot/v4/plot?" + 
 					"databaseversion=4.0&webserviceapi=4.0" + 
 					"&plottype="  + plotType + 
 					"&monitorid=" + monitorId + 
@@ -351,16 +351,17 @@
 
 				/*
 				Access to fetch at requestURL from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
-
+        
 				fetch(requestURL + "&responsetype=json", { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
+					  console.log(data);
 					})
 					.catch(error => {
 						console.log(error);
 					});
 				*/
-
+				
 				console.log(requestURL);
 			}
 		});
