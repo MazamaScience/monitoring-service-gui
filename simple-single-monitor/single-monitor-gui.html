@@ -288,6 +288,9 @@
 	</div>
 
 	<script type="text/javascript">
+	  const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/";
+	  const plotServiceName = "plot";
+	
 		$(function() {
 		  /**
 		   * Open the date input field as a DateRangerPicker widget.
@@ -374,25 +377,30 @@
 				// Convert format of input date range
 				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
 				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
-
-				// Build plot request URL
-				const plotRequestURL = 
-				  "https://tools.airfire.org/monitor-plot/v4/plot?" + 
-					"databaseversion=4.0&webserviceapi=4.0" + 
-					"&plottype="  + plotType + 
-					"&monitorid=" + monitorId + 
+				
+				// Build plot request queriy string
+				const queryParams = 
+				  "databaseversion=4.0" +
+				  "&webserviceapi=4.0" + 
+					"&plottype="  + plotType +
+					"&monitorid=" + monitorId +
 					"&startdate=" + startDate +
 					"&enddate="   + endDate;
 
-				/*
-				// Request the JSON response as well to check for server-side errors
+				// Build full plot request URL
+				const plotRequestURL = plotServicePath + plotServiceName + "?" + queryParams;
 				
+				// Request the JSON response as well to check for server-side errors
+				/*
 				Access to fetch at requestURL from origin 'null' has been blocked by 
 				CORS policy: No 'Access-Control-Allow-Origin' header is present on the 
 				requested resource. If an opaque response serves your needs, set the 
 				request's mode to 'no-cors' to fetch the resource with CORS disabled.
+        */
         
-				fetch(requestURL + "&responsetype=json", { mode: 'cors' })
+        const jsonRequestURL = "https://test.airfire.org/monitor-plot/test/plot?databaseversion=4.0&webserviceapi=4.0&plottype=timeseries&monitorid=530330030_01&startdate=20200101&enddate=20200110&responsetype=json"
+        
+				fetch(jsonRequestURL, { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
 					  console.log(data);
@@ -400,7 +408,7 @@
 					.catch(error => {
 						console.log(error);
 					});
-				*/
+				
 				
 				return plotRequestURL;
 			}
