@@ -131,7 +131,8 @@
 		}
 		
 		#error-box {
-		  width: max-content;
+		  /* width: max-content; */
+		  width: 60%;
 		  max-width: 100%;
 			margin: auto;
 			padding: 15px;
@@ -288,7 +289,9 @@
 	</div>
 
 	<script type="text/javascript">
-	  const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/";
+	  //const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/";
+	  //const plotServicePath = "https://test.airfire.org/monitor-plot/test/";
+	  const plotServicePath = "http://localhost:8080/monitor-plot/dev/"; // RStudio service
 	  const plotServiceName = "plot";
 	
 		$(function() {
@@ -306,9 +309,7 @@
 			  const monitorIdRegex = /^[0-9]+_[0-9]*$/;
 			  const monitorId = $("#monitorId").val();
 			  
-			  // Hide the error box
-			  $("#error-box").removeClass("visible");
-				$("#error-box").addClass("invisible");
+			  hideErrorBox();
 			  
 			  // Check if the input monitor ID matches the correct format.
 			  // If so, continue generating the plot.
@@ -316,14 +317,8 @@
 			  if (monitorIdRegex.test(monitorId)) {
 			    updatePlot();
 			  } else {
-			    // Set error box message
-			    $("#error-message").text(
-			      "ERROR: The input monitor ID: '" + monitorId + "' is not in the format 'aqsID_instrumentID'\nex. '010890014_01'"
-			    );
-			    
-			    // Show error box
-  				$("#error-box").removeClass("invisible");
-  				$("#error-box").addClass("visible");
+			    const errorMessage = "The input monitor ID: '" + monitorId + "' is not in the format 'aqsID_instrumentID'\nex. '010890014_01'";
+			    showErrorBox(errorMessage);
 			  }
 			});
 
@@ -331,13 +326,15 @@
        * React when a plot type is selected.
        */
 			$("input[type=radio][name=plot-type]").change(function() {
-			    updatePlot();
+			  hideErrorBox();
+			  updatePlot();
 			});
 
       /**
        * React when a date range is entered.
        */
 			$("input[name=daterange]").change(function() {
+			  hideErrorBox();
 				updatePlot();
 			});
 
@@ -354,6 +351,25 @@
 				$("#plot-image").addClass("visible");
 			}
 			
+			// Show error box
+			function showErrorBox(errorMessage) {
+			  // Set error box text
+		    $("#error-message").text(errorMessage);
+		    
+				$("#error-box").removeClass("invisible");
+				$("#error-box").addClass("visible");
+				
+				// Hide loading spinner
+				$("#loading-spinner").removeClass("visible");
+				$("#loading-spinner").addClass("invisible");
+			}
+			
+			// Hide the error box
+			function hideErrorBox() {
+			  $("#error-box").removeClass("visible");
+				$("#error-box").addClass("invisible");
+			}
+			
 			/**
 			 * Builds a plot request and sets the plot image to the resulting URL. 
 			 */
@@ -362,7 +378,9 @@
 			  
 			  console.log(plotRequestURL);
 			  
-			  updatePlotSource(plotRequestURL);
+			  if (plotRequestURL != null) {
+			    updatePlotSource(plotRequestURL);
+			  }
 			}
 
       /**
@@ -387,28 +405,26 @@
 					"&startdate=" + startDate +
 					"&enddate="   + endDate;
 
-				// Build full plot request URL
+				// Build plot image request URL
 				const plotRequestURL = plotServicePath + plotServiceName + "?" + queryParams;
 				
-				// Request the JSON response as well to check for server-side errors
-				/*
-				Access to fetch at requestURL from origin 'null' has been blocked by 
-				CORS policy: No 'Access-Control-Allow-Origin' header is present on the 
-				requested resource. If an opaque response serves your needs, set the 
-				request's mode to 'no-cors' to fetch the resource with CORS disabled.
-        */
+				// Build plot json request URL
+        const jsonRequestURL = plotRequestURL + "&responsetype=json";
         
-        const jsonRequestURL = "https://test.airfire.org/monitor-plot/test/plot?databaseversion=4.0&webserviceapi=4.0&plottype=timeseries&monitorid=530330030_01&startdate=20200101&enddate=20200110&responsetype=json"
-        
-				fetch(jsonRequestURL, { mode: 'cors' })
+        // Request the JSON response first to check for server-side errors
+        fetch(jsonRequestURL, { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
 					  console.log(data);
+					  
+					  if (data.status == "error") {
+					    showErrorBox(data.errors);
+					  }
 					})
 					.catch(error => {
-						console.log(error);
+						showErrorBox(error);
+						return null;
 					});
-				
 				
 				return plotRequestURL;
 			}
