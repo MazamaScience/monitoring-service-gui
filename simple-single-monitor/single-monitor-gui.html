@@ -5,15 +5,18 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Monitor Plots</title>
 
-	<!-- Load Bootstrap -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
-	integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+	<!-- CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
+	<!-- JavaScript -->	
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+	
+	
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 
 	<style type="text/css">
 		body {
@@ -26,71 +29,48 @@
 		h1 {
 			font-size: 32px;
 			text-align: center;
-		}
-		
-		h2 {
-			font-size: 24px;
-			text-align: center;
-			color: Gray;
-		}
-
-		fieldset {
-			margin-bottom: 20px;
+			margin-bottom: 16px;
 		}
 
 		input {
 			margin-bottom: 5px;
 		}
 
-		input[type="text"] {
-    		width: 100%;
+		img {
+			border-radius: 5px;
+		}
+
+		#toolbar {
+			width: 280px;
+			min-width: 280px;
+			height: 100vh;
+			padding: 0px 20px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background-color: White;
+			box-shadow: gray 0px 0px 20px;
+			border-bottom-right-radius: 10px;
+		}
+
+		#input-section {
+			display: flex;
+			flex-direction: column;
 		}
 
 		label {
 			font-weight: bold;
-		}
-		
-		li {
-		  margin-bottom: 10px;
+			margin-bottom: 2px;
 		}
 
-		#sidebar {
-			width: 300px;
-			min-width: 300px;
-			display: flex;
-			flex-direction: column;
-			justify-content: space-between;
-			background-color: White;
-			border-bottom-right-radius: 20px;
-			box-shadow: 0px 0px 10px gray;
-		}
-		
-		#sidebar-top {
-		  padding: 10px 20px;
+		label.form-check-label {
+			font-weight: normal;
 		}
 
-		#inputs {
-			width: 100%;
+		.text-input {
 			display: flex;
 			flex-direction: column;
 		}
-		
-		#instructions ol {
-		  margin: 10px 10px;
-		}
-	
-	  #instructions li {
-	    font-size: 14px;
-		  font-style: italic;
-	  }
-	  
-	  #instructions p {
-	    margin: 20px 30px;
-	    font-size: 14px;
-		  font-style: italic;
-	    text-align: left;
-	    color: Gray;
-	  }
 
 		#plot-view {
 			flex-grow: 1;
@@ -106,13 +86,8 @@
 		}
 
 		#plot-image {
-			width: 700px;
-			height: 700px;
-			margin: auto;
-			/* Responsive
-			max-width: 100%;
 			max-height: 100%;
-			*/
+			margin: auto;
 			box-shadow: 0px 0px 10px gray;
 		}
 
@@ -124,16 +99,14 @@
 			height: 100px;
 			transform-origin: 0% 0%;
 			border: 12px solid WhiteSmoke;
-			border-top: 12px solid CornflowerBlue;
+			border-top: 12px solid #007bff;
 			border-radius: 50%;
 			animation: spin 0.45s linear infinite;
 			-webkit-animation: spin 0.45s linear infinite; /* Safari */
 		}
 		
 		#error-box {
-		  /* width: max-content; */
-		  width: 60%;
-		  max-width: 100%;
+		  	width: 60%;
 			margin: auto;
 			padding: 15px;
 			display: flex;
@@ -155,8 +128,25 @@
 		  margin: 0px;
 		}
 
-		.radio-label {
-			font-weight: normal;
+		#instructions-section {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		#instructions-details {
+			padding-right: 15px;		}
+
+		#instructions-section h1 {
+			font-size: 1.5rem;
+		}
+
+		#instructions-section ol {
+			font-size: 0.8rem;
+		}
+
+		#instructions-section p {
+			font-size: 0.7rem;
 		}
 
 		.visible {
@@ -167,40 +157,45 @@
 			display: none;
 		}
 
-		@media screen and (max-width: 1000px) {
+		/* Small devices (landscape phones, less than 768px) */
+		@media (max-width: 767.98px) {
 			body {
 				flex-direction: column;
 			}
 
-			fieldset {
-				margin-left: 10px;
-				margin-right: 10px;
-				margin-bottom: 0px;
+			#toolbar {
+				width: 100vw;
+				height: auto;
+				margin-bottom: 20px;
+				padding: 0px 15px;
+				border-bottom-left-radius: 10px;
 			}
 
-			#sidebar {
-				width: 100%;
+			#input-section {
+				margin: auto;
 				flex-direction: row;
-				justify-content: space-between;
-				align-items: center;
-				flex-wrap: wrap;
-				border-bottom-right-radius: 10px;
-				border-bottom-right-radius: 10px;
 			}
 
-			#inputs {
-				flex-direction: row;
-				justify-content: space-between;
-				align-items: center;
-				flex-wrap: wrap;
+			#plot-type-list {
+				margin-right: 30px;
 			}
 
-			#daterange {
-				width: 100%;
+			#instructions-section ol {
+				font-size: 0.8rem;
+			}
+
+			#instructions-section p {
+				text-align: center;
+				font-size: 0.7rem;
 			}
 
 			#plot-view {
+				height: auto;
 				padding: 20px 20px;
+			}
+
+			#plot-image {
+				width: 100%;
 			}
 		}
 
@@ -218,63 +213,65 @@
 </head>
 
 <body>
-	<div id="sidebar">
-	  <div id="sidebar-top">
-			<h1>Monitor Plots</h1>
+	<div id="toolbar">
+		<!-- page title -->
+		<div>
+			<h1>Single-Monitor Plots</h1>
+		</div>
 
-  		<hr>
-  
-  		<div id="inputs">
+			<!-- Input widgets -->
+  		<div id="input-section">
   			<!-- Plot type input -->
-  			<fieldset id="plot-type-list">
+  			<div id="plot-type-list" class="form-group mb-3">
   				<label>Plot type</label>
-  				<br>
-  				<input type="radio" name="plot-type" value="dailybarplot" checked>
-   				<label class="radio-label">Daily average</label>
-   				<br>
-   				<input type="radio" name="plot-type" value="dailybyhour">
-   				<label class="radio-label">Time of day</label>
-   				<br>
-   				<input type="radio" name="plot-type" value="timeseries">
-   				<label class="radio-label">Time series</label>
-  			</fieldset>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="plot-type" value="dailybarplot" checked>
+					<label class="form-check-label">Daily average</label>
+				</div>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="plot-type" value="dailybyhour">
+					<label class="form-check-label">Time of day</label>
+				</div>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="plot-type" value="timeseries">
+					<label class="form-check-label">Time series</label>
+				</div>
+  			</div>
   
-  			<!-- Monitor ID input -->
-  			<fieldset>
-  				<label for="monitorId">Monitor ID</label>
-  				<br>
-  				<input id="monitorId" type="text" name="monitorId">
-  			</fieldset>
-  
-  			<!-- Time range input -->
-  			<fieldset>
-  				<label >Date range</label>
-  				<input id="daterange" type="text" name="daterange" value=""/>
-  			</fieldset>	
+  			<!-- Text inputs -->
+  			<div>
+  				<!-- Monitor ID input -->
+	  			<div class="form-group mb-3 text-input">
+	  				<label>Monitor ID</label>
+	  				<input id="monitorId" type="text" name="monitorId" size="8">
+	  			</div>
+	  
+	  			<!-- Time range input -->
+	  			<div class="form-group mb-3 text-input">
+	  				<label>Date range</label>
+	  				<input id="daterange" type="text" name="daterange" value=""/>
+	  			</div>
+  			</div>
   		</div>
-  		
-  		<hr>
-	  </div>
-		
-		<div id="instructions">
-  	  <h2>Instructions</h2>
-  	  
-  	  <ol>
-  	    <li>Select which type of plot you would like to generate.</li>
-  	    <li>Type in the ID of the monitor you would like to inspect. You can find
-  	    a monitor's ID by clicking on its icon in
-  	    <a href="https://tools.airfire.org/monitoring" target="_blank">this map</a>
-  	    and scrolling down to the "Selected Monitors" list at the bottom of the 
-  	    page.
-  	    </li>
-  	    <li>Select the date range by clicking on the date widget. You can type 
-  	    in the start and end dates or select a start and end day in the calendar
-  	    popup.</li>
-  	  </ol>
-  	  
-  	  <p>Changing any of the fields will automatically generate a plot. The 
-  	  image itself may take a few seconds to load.</p>
-  	</div>
+	
+		<div id="instructions-section">
+			<button class="btn btn-primary mb-3" type="button" data-toggle="collapse" data-target="#instructions-details">
+				Instructions
+			</button>
+
+			<div id="instructions-details" class="collapse">
+				<ol>
+			  	    <li>Select which type of plot you would like to generate.</li>
+			  	    <li>Type in the ID of the monitor you would like to inspect. You can find a monitor's ID by clicking on its icon in <a href="https://tools.airfire.org/monitoring" target="_blank">this map</a> and scrolling down to the "Selected Monitors" list at the bottom of the page.</li>
+			  	    <li>Select the date range by clicking on the date widget. You can type  in the start and end dates or select a start and end day in the calendar popup.</li>
+			  	</ol>
+			  	  
+			  	<p>Changing any of the fields will automatically generate a plot. The image itself may take a few seconds to load.</p>
+			</div>
+		</div>
 	</div>
 
 	<div id="plot-view">
@@ -289,60 +286,57 @@
 	</div>
 
 	<script type="text/javascript">
-	  //const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/"; // Production
-	  //const plotServicePath = "https://test.airfire.org/monitor-plot/test/"; // Test 
-	  const plotServicePath = "http://localhost:8080/monitor-plot/dev/"; // RStudio service
-	  const plotServiceName = "plot";
-	  
-	  console.log(moment()
-    .subtract(10, "day")
-    .endOf("day")
-    .toDate())
+		//const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/"; // Production
+	  	//const plotServicePath = "https://test.airfire.org/monitor-plot/test/"; // Test 
+	  	//const plotServicePath = "http://localhost:8080/monitor-plot/dev/"; // RStudio test
+	  	//const plotServicePath = "http://localhost:8080/monitor-plot/test/" // Local Docker test
+	  	const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
+	  	const plotServiceName = "plot";
 	
 		$(function() {
-		  /**
-		   * Open the date input field as a DateRangerPicker widget, and set the 
-		   * initial date range to the last 10 days.
-		   */
+			/**
+		   	 * Open the date input field as a DateRangerPicker widget, and set the 
+		   	 * initial date range to the last 10 days.
+		   	 */
 			$("input[name=daterange]").daterangepicker({
-			  startDate: moment().subtract(10, "day").startOf("day").toDate(),
-        endDate: moment().startOf("day").toDate(),
+				startDate: moment().subtract(10, "day").startOf("day").toDate(),
+        		endDate: moment().startOf("day").toDate(),
 				opens: "left"
 			}, function(start, end, label) { });
 
-      /**
-       * React when a monitor ID is entered. 
-       */
+      		/**
+       		 * React when a monitor ID is entered. 
+       		 */
 			$("#monitorId").change(function() {
-			  const monitorIdRegex = /^[0-9]+_[0-9]*$/;
-			  const monitorId = $("#monitorId").val();
+			 	const monitorIdRegex = /^[0-9]+_[0-9]*$/;
+			 	const monitorId = $("#monitorId").val();
 			  
-			  hideErrorBox();
+			  	hideErrorBox();
 			  
-			  // Check if the input monitor ID matches the correct format.
-			  // If so, continue generating the plot.
-			  // Otherwise, inform the user with an error message.
-			  if (monitorIdRegex.test(monitorId)) {
-			    updatePlot();
-			  } else {
-			    const errorMessage = "The input monitor ID: '" + monitorId + "' is not in the format 'aqsID_instrumentID'\nex. '010890014_01'";
-			    showErrorBox(errorMessage);
-			  }
+			  	// Check if the input monitor ID matches the correct format.
+			  	// If so, continue generating the plot.
+			  	// Otherwise, inform the user with an error message.
+			  	if (monitorIdRegex.test(monitorId)) {
+			    	updatePlot();
+			  	} else {
+			    	const errorMessage = "The input monitor ID: '" + monitorId + "' is not in the format 'aqsID_instrumentID'\nex. '010890014_01'";
+			    	showErrorBox(errorMessage);
+			  	}
 			});
 
-      /**
-       * React when a plot type is selected.
-       */
+      		/**
+       		 * React when a plot type is selected.
+       		 */
 			$("input[type=radio][name=plot-type]").change(function() {
-			  hideErrorBox();
-			  updatePlot();
+			 	hideErrorBox();
+			  	updatePlot();
 			});
 
-      /**
-       * React when a date range is entered.
-       */
+      		/**
+       		 * React when a date range is entered.
+       		 */
 			$("input[name=daterange]").change(function() {
-			  hideErrorBox();
+			  	hideErrorBox();
 				updatePlot();
 			});
 
@@ -361,8 +355,8 @@
 			
 			// Show error box
 			function showErrorBox(errorMessage) {
-			  // Set error box text
-		    $("#error-message").text(errorMessage);
+			  	// Set error box text
+		    	$("#error-message").text(errorMessage);
 		    
 				$("#error-box").removeClass("invisible");
 				$("#error-box").addClass("visible");
