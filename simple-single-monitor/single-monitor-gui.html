@@ -61,11 +61,15 @@
 		}
 
 		#buttons-section {
-				width: 100%;
-				display: flex;
-				flex-direction: row;
-				justify-content: space-around;
-			}
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-around;
+		}
+
+		#buttons-section button {
+			width: 90px;
+		}
 
 		#nonbutton-section {
 			display: flex;
@@ -285,7 +289,7 @@
 				</button>
 
 				<button id="generate-button" class="btn btn-success" type="button">
-					Generate
+					GO
 				</button>
 	  		</div>
   		</div>
@@ -345,11 +349,9 @@
 			  	if (monitorIdRegex.test(monitorId)) {
 			    	updatePlot();
 			  	} else {
-			    	const errorMessage = "The input monitor ID: '" + monitorId + "' is not in the format 'aqsID_instrumentID'\nex. '010890014_01'";
+			    	const errorMessage = "The input monitor ID: '" + monitorId + "' is not in the format 'aqsID_instrumentID'\nExample: '010890014_01'";
 			    	showErrorBox(errorMessage);
 			  	}
-
-			  	updatePlot();
 			});
 
 			/**
