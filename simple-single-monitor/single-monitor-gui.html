@@ -399,9 +399,9 @@
 			  }
 			}
 
-      /**
-       * Builds a request to the plot service API using form input.
-       */
+	      	/**
+	         * Builds a request to the plot service API using form input.
+	         */
 			function buildPlotRequestURL() {
 				// Get form input
 				const plotType  = $("input[name=plot-type]:checked").val();
@@ -425,24 +425,51 @@
 				const plotRequestURL = plotServicePath + plotServiceName + "?" + queryParams;
 				
 				// Build plot json request URL
-        const jsonRequestURL = plotRequestURL + "&responsetype=json";
+        		const jsonRequestURL = plotRequestURL + "&responsetype=json";
         
-        // Request the JSON response first to check for server-side errors
-        fetch(jsonRequestURL, { mode: 'cors' })
+		        // Request the JSON response first to check for server-side errors
+		        fetch(jsonRequestURL, { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
 					  console.log(data);
-					  
 					  if (data.status == "error") {
-					    showErrorBox(data.errors);
+					  	handleServerError(data.errors);
+					  	return null;
 					  }
 					})
 					.catch(error => {
-						showErrorBox(error);
 						return null;
 					});
 				
 				return plotRequestURL;
+			}
+
+			/**
+			 * Handles server side errors by displaying them in an error message box. Some common errors are translated to more user-friendly text.
+			 * @param error  the error message string from the server
+			 */
+			function handleServerError(serverErrorString) {
+				// Define regex test patterns for common errors
+				const nonexistantMonitorIDPattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in monitor_subset\(ws_monitor1, monitorIDs = monitorID\) : ↵  ws_monitor object contains zero monitors↵$/;
+
+				// Collapse all line breaks in the server error string with a "↵" character
+				const stringifiedError = serverErrorString.replace(/(\r\n|\n|\r)/gm, "↵");
+				console.log(stringifiedError);
+
+				// Default error box message if the server error doesn't match an existing test pattern
+				let errorBoxMessage = serverErrorString;
+
+				// Test if the server error matches a pattern, and generate the corresponding error box message
+				if (nonexistantMonitorIDPattern.test(stringifiedError)) {
+					const monitorId = $("#monitorId").val();
+					errorBoxMessage = "Could not find monitor with ID: '" + monitorId + "'";
+				} else if (invalidDateRangePattern.test(stringifiedError)) {
+					errorBoxMessage = "Weewoo";
+				}
+
+				console.log(serverErrorString);
+
+				showErrorBox(errorBoxMessage);
 			}
 			
 			/**
