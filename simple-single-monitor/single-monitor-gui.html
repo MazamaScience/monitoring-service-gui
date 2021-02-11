@@ -453,8 +453,10 @@
 			function handleServerError(serverErrorString) {
 				// Define regex test patterns for common errors
 				const nonexistantMonitorIDPattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in monitor_subset\(ws_monitor1, monitorIDs = monitorID\) : ↵  ws_monitor object contains zero monitors↵$/;
+				const dateRangeBefore1998Pattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in monitor_loadAnnual\(year, parameter, baseUrl, dataDir, aqsPreference\) : ↵  PWFSL has processed no data prior to 1998\.↵$/;
+				const futureDateRangePattern = /^Error : Error in if \(!timezone %in% base::OlsonNames\(\)\) stop\(paste0\("Timezone '",  : ↵  argument is of length zero↵$/;
+				const multiYearDateRangePattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in PWFSLSmoke::monitor_load\(startdate = startdate, enddate = enddate,  : ↵  Requests covering multiple years are not supported↵$/;
 				const noReadingsInDateRangePattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: \$ operator is invalid for atomic vectors↵$/;
-				const multipleYearsPattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in PWFSLSmoke::monitor_load\(startdate = startdate, enddate = enddate,  : ↵  Requests covering multiple years are not supported↵$/;
 
 				// Replace all line breaks in the server error string with a "↵" character
 				const stringifiedError = serverErrorString.replace(/(\r\n|\n|\r)/gm, "↵");
@@ -466,12 +468,16 @@
 				// Test if the server error string matches a pattern. If so, generate the corresponding error box message
 				if (nonexistantMonitorIDPattern.test(stringifiedError)) {
 					const monitorId = $("#monitorId").val();
-					errorBoxMessage = "Could not find monitor with ID: '" + monitorId + "'";
+					errorBoxMessage = "Could not find monitor with ID: '" + monitorId + "'.";
+				} else if (dateRangeBefore1998Pattern.test(stringifiedError)) {
+					errorBoxMessage = "PWFSL has processed no data prior to 1998.";
+				} else if (futureDateRangePattern.test(stringifiedError)) {
+					errorBoxMessage = "Date range has not occurred yet.";
+				} else if (multiYearDateRangePattern.test(stringifiedError)) {
+					errorBoxMessage = "Date range cannot span multiple years.";
 				} else if (noReadingsInDateRangePattern.test(stringifiedError)) {
-					errorBoxMessage = "Monitor has no readings in this date range";
-				} else if (multipleYearsPattern.test(stringifiedError)) {
-					errorBoxMessage = "Date range cannot span multiple years";
-				}
+					errorBoxMessage = "Monitor has no data readings in this date range.";
+				} 
 
 				showErrorBox(errorBoxMessage);
 			}
