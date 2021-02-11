@@ -53,25 +53,25 @@
 			border-bottom-right-radius: 15px;
 		}
 
-		#input-section {
+		#inputs-section {
 			width: 100%;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 		}
 
-		#buttons-section {
+		#action-buttons-section {
 			width: 100%;
 			display: flex;
 			flex-direction: row;
 			justify-content: space-around;
 		}
 
-		#buttons-section button {
+		#action-buttons-section button {
 			width: 90px;
 		}
 
-		#nonbutton-section {
+		#query-inputs-section {
 			display: flex;
 			flex-direction: column;
 			width: 100%;
@@ -191,11 +191,11 @@
 				border-bottom-left-radius: 15px;
 			}
 
-			#input-section {
+			#inputs-section {
 				width: auto;
 			}
 
-			#nonbutton-section {
+			#query-inputs-section {
 				margin: auto;
 				flex-direction: row;
 				justify-content: center;
@@ -244,9 +244,9 @@
 			<h1>Single-Monitor Plots</h1>
 		</div>
 
-			<!-- Input widgets -->
-  		<div id="input-section" class="mb-3">
-  			<div id="nonbutton-section">
+		<!-- Inputs -->
+  		<div id="inputs-section" class="mb-3">
+  			<div id="query-inputs-section">
   				<!-- Plot type input -->
 	  			<div id="plot-type-list" class="form-group mb-3">
 	  				<label>Plot type</label>
@@ -283,7 +283,8 @@
 	  			</div>
   			</div>
 
-  			<div id="buttons-section">
+  			<!-- How-to and GO buttons -->
+  			<div id="action-buttons-section">
 	  			<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#instructions-details">
 					How-to
 				</button>
@@ -312,8 +313,8 @@
 			<img id="plot-image" src="" class="invisible">
 			<div id="loading-spinner" class="invisible"></div>
 			<div id="error-box" class="invisible">
-			  <h1>ERROR</h1>
-			  <p id="error-message"></p>
+				<h1>ERROR</h1>
+				<p id="error-message"></p>
 			</div>
 		</div>
 	</div>
@@ -382,7 +383,7 @@
 			
 			// Hide the error box
 			function hideErrorBox() {
-			  $("#error-box").removeClass("visible");
+				$("#error-box").removeClass("visible");
 				$("#error-box").addClass("invisible");
 			}
 			
@@ -390,17 +391,17 @@
 			 * Builds a plot request and sets the plot image to the resulting URL. 
 			 */
 			function updatePlot() {
-			  const plotRequestURL = buildPlotRequestURL();
+				const plotRequestURL = buildPlotRequestURL();
 			  
-			  console.log(plotRequestURL);
+				console.log("Plot request URL: " + plotRequestURL);
 			  
-			  if (plotRequestURL != null) {
-			    updatePlotSource(plotRequestURL);
-			  }
+			  	if (plotRequestURL != null) {
+			    	updatePlotSource(plotRequestURL);
+			  	}
 			}
 
 	      	/**
-	         * Builds a request to the plot service API using form input.
+	         * Builds a URL request to the plot service API using form input.
 	         */
 			function buildPlotRequestURL() {
 				// Get form input
@@ -412,7 +413,7 @@
 				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
 				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
 				
-				// Build plot request queriy string
+				// Build plot request query string
 				const queryParams = 
 				  "databaseversion=4.0" +
 				  "&webserviceapi=4.0" + 
@@ -421,7 +422,7 @@
 					"&startdate=" + startDate +
 					"&enddate="   + endDate;
 
-				// Build plot image request URL
+				// Build full plot image request URL
 				const plotRequestURL = plotServicePath + plotServiceName + "?" + queryParams;
 				
 				// Build plot json request URL
@@ -431,11 +432,12 @@
 		        fetch(jsonRequestURL, { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
-					  console.log(data);
-					  if (data.status == "error") {
-					  	handleServerError(data.errors);
-					  	return null;
-					  }
+						console.log(data);
+
+						if (data.status == "error") {
+					  		handleServerError(data.errors);
+					  		return null;
+					  	}
 					})
 					.catch(error => {
 						return null;
@@ -451,33 +453,34 @@
 			function handleServerError(serverErrorString) {
 				// Define regex test patterns for common errors
 				const nonexistantMonitorIDPattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in monitor_subset\(ws_monitor1, monitorIDs = monitorID\) : ↵  ws_monitor object contains zero monitors↵$/;
+				const noReadingsInDateRangePattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: \$ operator is invalid for atomic vectors↵$/;
+				const multipleYearsPattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in PWFSLSmoke::monitor_load\(startdate = startdate, enddate = enddate,  : ↵  Requests covering multiple years are not supported↵$/;
 
-				// Collapse all line breaks in the server error string with a "↵" character
+				// Replace all line breaks in the server error string with a "↵" character
 				const stringifiedError = serverErrorString.replace(/(\r\n|\n|\r)/gm, "↵");
 				console.log(stringifiedError);
 
-				// Default error box message if the server error doesn't match an existing test pattern
+				// Default error box message if the server error string doesn't match an existing test pattern
 				let errorBoxMessage = serverErrorString;
 
-				// Test if the server error matches a pattern, and generate the corresponding error box message
+				// Test if the server error string matches a pattern. If so, generate the corresponding error box message
 				if (nonexistantMonitorIDPattern.test(stringifiedError)) {
 					const monitorId = $("#monitorId").val();
 					errorBoxMessage = "Could not find monitor with ID: '" + monitorId + "'";
-				} else if (invalidDateRangePattern.test(stringifiedError)) {
-					errorBoxMessage = "Weewoo";
+				} else if (noReadingsInDateRangePattern.test(stringifiedError)) {
+					errorBoxMessage = "Monitor has no readings in this date range";
+				} else if (multipleYearsPattern.test(stringifiedError)) {
+					errorBoxMessage = "Date range cannot span multiple years";
 				}
-
-				console.log(serverErrorString);
 
 				showErrorBox(errorBoxMessage);
 			}
 			
 			/**
-			 * Sets the plot image's source URL and hides the plot and shows the 
-			 * loading spinner.
+			 * Sets the source URL for the plot image, then hides the plot and shows the loading spinner.
 			 */
 			function updatePlotSource(plotRequestURL) {
-			  // Update plot image source
+				// Update plot image source
 				$("#plot-image").attr("src", plotRequestURL);
 				
 				// Hide plot image
