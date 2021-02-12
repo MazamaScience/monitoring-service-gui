@@ -350,10 +350,6 @@
 				// Hide loading spinner
 				$("#loading-spinner").removeClass("visible");
 				$("#loading-spinner").addClass("invisible");
-
-				// Show plot image
-				$("#plot-image").removeClass("invisible");
-				$("#plot-image").addClass("visible");
 			}
 			
 			// Show error box
@@ -384,7 +380,7 @@
 				console.log("Plot request URL: " + plotRequestURL);
 			  
 			  	if (plotRequestURL != null) {
-			    	updatePlotSource(plotRequestURL);
+			    	window.open(plotRequestURL, '_blank');
 			  	}
 			}
 
@@ -487,16 +483,9 @@
 			}
 			
 			/**
-			 * Sets the source URL for the plot image, then hides the plot and shows the loading spinner.
+			 * Shows the loading spinner.
 			 */
 			function updatePlotSource(plotRequestURL) {
-				// Update plot image source
-				$("#plot-image").attr("src", plotRequestURL);
-				
-				// Hide plot image
-				$("#plot-image").removeClass("visible");
-				$("#plot-image").addClass("invisible");
-
 				// Show loading spinner
 				$("#loading-spinner").removeClass("invisible");
 				$("#loading-spinner").addClass("visible");
