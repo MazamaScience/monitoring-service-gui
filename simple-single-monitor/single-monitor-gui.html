@@ -44,10 +44,6 @@
 			margin-bottom: 5px;
 		}
 
-		img {
-			border-radius: 5px;
-		}
-
 		#toolbar {
 			width: 280px;
 			min-width: 280px;
@@ -294,28 +290,141 @@
 	</div>
 
 	<script type="text/javascript">
-		//const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/"; // Production
-	  	//const plotServicePath = "https://test.airfire.org/monitor-plot/test/"; // Test 
-	  	//const plotServicePath = "http://localhost:8080/monitor-plot/dev/"; // RStudio test
-	  	//const plotServicePath = "http://localhost:8080/monitor-plot/test/" // Local Docker test
-	  	const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
-	  	const plotServiceName = "plot";
-
-	  	var myMap = L.map('leaflet-map').setView([51.505, -0.09], 13);
-
-		var stamenLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
-			attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-			subdomains: 'abcd',
-			minZoom: 3,
-			maxZoom: 14,
-			ext: 'png'
-		});
-
-		var marker = L.marker([51.5, -0.09]).addTo(myMap);
-
-		myMap.addLayer(stamenLayer);
-	
 		$(function() {
+			//const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/"; // Production
+		  	//const plotServicePath = "https://test.airfire.org/monitor-plot/test/"; // Test 
+		  	//const plotServicePath = "http://localhost:8080/monitor-plot/dev/"; // RStudio test
+		  	//const plotServicePath = "http://localhost:8080/monitor-plot/test/" // Local Docker test
+		  	const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
+		  	const plotServiceName = "plot";
+
+		  	const monitorsGeoJSONPath = "https://haze.airfire.org/monitoring/latest/geojson/PM2.5_latest10.geojson";
+
+		  	// Create the Leaflet map
+			var monitorMap = L.map('leaflet-map').setView([39.5, -98.35], 4);
+
+			// Create a Stamen tile layer and add it to the map
+			var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
+				attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+				subdomains: 'abcd',
+				minZoom: 4,
+				maxZoom: 15,
+				ext: 'png'
+			}).addTo(monitorMap);
+
+			/**
+			 * Instructions for each monitor marker.
+			 * @param monitorFeature  a monitor's GeoJSON feature description
+			 * @param layer  ? TODO
+			 */
+			function onEachMonitorFeature(monitorFeature, layer) {
+			    if (monitorFeature.properties && monitorFeature.properties.monitorID) {
+			    	const monitorId = monitorFeature.properties.monitorID;
+
+			        layer.bindPopup(monitorId);
+
+			        layer.on('click', function(e) {
+			        	$("#monitorId").val(monitorFeature.properties.monitorID);
+			        });
+			    }
+			}
+
+			// Load the monitors GeoJSON and add them to the map as markers
+			// TODO: CORS error from service
+			/*
+			L.geoJSON(loadMonitorsGeoJSON(), {
+			    onEachFeature: onEachMonitorFeature
+			}).addTo(monitorMap);
+			*/
+
+			/**
+			 * Request the monitors GeoJSON file.
+			 */
+			function loadMonitorsGeoJSON() {
+		        fetch(monitorsGeoJSONPath, { mode: 'cors' })
+					.then(response => response.json())
+					.then(data => {
+						console.log(data);
+
+						if (data.status == "error") {
+					  		handleServerError(data.errors);
+					  		return null;
+					  	}
+					})
+					.catch(error => {
+						return null;
+					});
+			}
+
+			// Test GeoJSON
+			let testMonitorFeatures = {
+			  "type": "FeatureCollection",
+			  "features": [
+			    {
+			      "type": "Feature",
+			      "id": 1,
+			      "properties": {
+			        "monitorID": "MMMT10006_01",
+			        "siteName": "Cut Bank",
+			        "agencyName": "Montana DEQ",
+			        "timezone": "America/Denver",
+			        "dataSource": "AIRNOW",
+			        "telemetryAggregator": null,
+			        "telemetryUnitID": null,
+			        "processingTime": "2021-02-15 18:48:45",
+			        "lastValidUTCTime": "2021-02-11 16:00:00",
+			        "lastValidLocalTime": "2021-02-11 16:00:00 UTC",
+			        "PM2.5_nowcast": null,
+			        "PM2.5_1hr": 0,
+			        "PM2.5_3hr": 0,
+			        "PM2.5_yesterday": null,
+			        "latency": 97,
+			        "monitoringSiteUrl": "http://tools.airfire.org/monitoring/v4/#!/?monitors=MMMT10006_01"
+			      },
+			      "geometry": {
+			        "type": "Point",
+			        "coordinates": [
+			          -112.3638,
+			          48.6074
+			        ]
+			      }
+			    },
+			    {
+			      "type": "Feature",
+			      "id": 2,
+			      "properties": {
+			        "monitorID": "CC0050138_01",
+			        "siteName": "York-Roberval",
+			        "agencyName": "Canada-Quebec2",
+			        "timezone": "America/New_York",
+			        "dataSource": "AIRNOW",
+			        "telemetryAggregator": null,
+			        "telemetryUnitID": null,
+			        "processingTime": "2021-02-15 18:48:45",
+			        "lastValidUTCTime": "2021-02-12 03:00:00",
+			        "lastValidLocalTime": "2021-02-12 03:00:00 UTC",
+			        "PM2.5_nowcast": 7.6,
+			        "PM2.5_1hr": 7,
+			        "PM2.5_3hr": 7.4,
+			        "PM2.5_yesterday": null,
+			        "latency": 86,
+			        "monitoringSiteUrl": "http://tools.airfire.org/monitoring/v4/#!/?monitors=CC0050138_01"
+			      },
+			      "geometry": {
+			        "type": "Point",
+			        "coordinates": [
+			          -73.5669,
+			          45.5122
+			        ]
+			      }
+			    }
+			  ]
+			};
+
+			L.geoJSON(testMonitorFeatures, {
+			    onEachFeature: onEachMonitorFeature
+			}).addTo(monitorMap);
+
 			/**
 		   	 * Open the date input field as a DateRangerPicker widget, and set the 
 		   	 * initial date range to the last 10 days.
