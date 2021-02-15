@@ -301,13 +301,13 @@
 		  	const monitorsGeoJSONPath = "https://haze.airfire.org/monitoring/latest/geojson/PM2.5_latest10.geojson";
 
 		  	// Create the Leaflet map
-			var monitorMap = L.map('leaflet-map').setView([39.5, -98.35], 4);
+			var monitorMap = L.map('leaflet-map').setView([39.5, -98.35], 3);
 
 			// Create a Stamen tile layer and add it to the map
 			var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
 				attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 				subdomains: 'abcd',
-				minZoom: 4,
+				minZoom: 3,
 				maxZoom: 15,
 				ext: 'png'
 			}).addTo(monitorMap);
