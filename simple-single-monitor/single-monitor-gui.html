@@ -300,7 +300,7 @@
 
 		  	const monitorsGeoJSONPath = "https://haze.airfire.org/monitoring/latest/geojson/PM2.5_latest10.geojson";
 
-		  	// Create the Leaflet map
+		  	// Create the Leaflet map centered on the US
 			var monitorMap = L.map('leaflet-map').setView([39.5, -98.35], 3);
 
 			// Create a Stamen tile layer and add it to the map
@@ -329,31 +329,26 @@
 			    }
 			}
 
-			// Load the monitors GeoJSON and add them to the map as markers
-			// TODO: CORS error from service
-			/*
-			L.geoJSON(loadMonitorsGeoJSON(), {
-			    onEachFeature: onEachMonitorFeature
-			}).addTo(monitorMap);
-			*/
-
 			/**
-			 * Request the monitors GeoJSON file.
+			 * Fetch and load the monitors GeoJSON file from AirFire.
 			 */
 			function loadMonitorsGeoJSON() {
+				// TODO: CORS error from service
 		        fetch(monitorsGeoJSONPath, { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
 						console.log(data);
 
-						if (data.status == "error") {
-					  		handleServerError(data.errors);
-					  		return null;
-					  	}
+					  	/*
+						L.geoJSON(loadMonitorsGeoJSON(), {
+						    onEachFeature: onEachMonitorFeature
+						}).addTo(monitorMap);
+						*/
 					})
 					.catch(error => {
 						return null;
-					});
+					}
+				);
 			}
 
 			// Test GeoJSON
@@ -421,6 +416,9 @@
 			  ]
 			};
 
+			/**
+			 * Load the test monitors GeoJSON and add them to the map as markers.
+			 */ 
 			L.geoJSON(testMonitorFeatures, {
 			    onEachFeature: onEachMonitorFeature
 			}).addTo(monitorMap);
@@ -432,6 +430,8 @@
 			$("input[name=daterange]").daterangepicker({
 				startDate: moment().subtract(10, "day").startOf("day").toDate(),
         		endDate: moment().startOf("day").toDate(),
+        		minDate: "01/01/1998",
+        		maxDate: moment().startOf("day").toDate(),
 				opens: "left"
 			}, function(start, end, label) {});
 
