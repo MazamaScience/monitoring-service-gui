@@ -364,7 +364,15 @@
 					})
 
 					// Open a popup when the marker is clicked
-					monitorMarker.bindPopup(monitorId);
+					//monitorMarker.bindPopup(monitorId);
+
+					// Open a popup when the marker is hovered over
+					monitorMarker.on('mouseover', function(e) {
+						  var popup = L.popup({autoPan: false})
+						   .setLatLng(e.latlng) 
+						   .setContent(monitorId)
+						   .openOn(monitorMap);
+					});
 
 					// Highlight the marker when clicked
 					monitorMarker.on('click', function(e) {
@@ -519,6 +527,9 @@
 				showErrorBox(errorBoxMessage);
 			}
 
+			/**
+			 * Hide the error box when it is clicked.
+			 */
 			$("#error-box").on("click", function () {
         		hideErrorBox();
     		});
