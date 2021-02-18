@@ -298,10 +298,15 @@
 		  	const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
 		  	const plotServiceName = "plot";
 
-		  	const monitorsGeoJSONPath = "https://haze.airfire.org/monitoring/latest/geojson/PM2.5_latest10.geojson";
+		  	const monitorsGeoJSONPath = "https://tools.airfire.org/monitor-data/v4/geojson";
 
 		  	// Create the Leaflet map centered on the US
-			var monitorMap = L.map('leaflet-map').setView([39.5, -98.35], 3);
+			var monitorMap = L.map('leaflet-map', {
+				preferCanvas: true
+			}).setView([39.5, -98.35], 3);
+
+			// Create a canvas layer
+			var mapRenderer = L.canvas({ padding: 0.5 });
 
 			// Create a Stamen tile layer and add it to the map
 			var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
@@ -312,116 +317,57 @@
 				ext: 'png'
 			}).addTo(monitorMap);
 
+			addMonitorMarkers();
+
 			/**
 			 * Instructions for each monitor marker.
 			 * @param monitorFeature  a monitor's GeoJSON feature description
 			 * @param layer  ? TODO
 			 */
-			function onEachMonitorFeature(monitorFeature, layer) {
+			function createMonitorMarker(monitorFeature, layer) {
 			    if (monitorFeature.properties && monitorFeature.properties.monitorID) {
-			    	const monitorId = monitorFeature.properties.monitorID;
+			    	// Get monitor ID
+					const monitorId = monitorFeature.properties.monitorID;
 
-			        layer.bindPopup(monitorId);
+			    	// Get monitor coordinates
+			    	const coords = monitorFeature.geometry.coordinates;
+					const lon = coords[0];
+					const lat = coords[1];
 
-			        layer.on('click', function(e) {
-			        	$("#monitorId").val(monitorFeature.properties.monitorID);
-			        });
+					// Create a circle marker for the monitor on the map
+					// Give it a popup with its monitor ID and have it set the monitor ID form input when clicked
+					L.circleMarker([lat, lon], {
+						radius: 8,
+						weight: 2,
+						color: "#0055cc",
+						fillColor: "#3388ff",
+						renderer: mapRenderer
+					})
+					.bindPopup(monitorId)
+					.on('click', function(e) {
+			        	$("#monitorId").val(monitorId);
+			        })
+			        .addTo(monitorMap);
 			    }
 			}
 
 			/**
-			 * Fetch and load the monitors GeoJSON file from AirFire.
+			 * Fetch and load the monitors GeoJSON file from AirFire. Then display them on the map as markers.
 			 */
-			function loadMonitorsGeoJSON() {
-				// TODO: CORS error from service
+			function addMonitorMarkers() {
 		        fetch(monitorsGeoJSONPath, { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
-						console.log(data);
-
-					  	/*
-						L.geoJSON(loadMonitorsGeoJSON(), {
-						    onEachFeature: onEachMonitorFeature
-						}).addTo(monitorMap);
-						*/
+						// Create a marker for each monitor feature
+						L.geoJSON(data, {
+						    onEachFeature: createMonitorMarker
+						});
 					})
 					.catch(error => {
 						return null;
 					}
 				);
 			}
-
-			// Test GeoJSON
-			let testMonitorFeatures = {
-			  "type": "FeatureCollection",
-			  "features": [
-			    {
-			      "type": "Feature",
-			      "id": 1,
-			      "properties": {
-			        "monitorID": "MMMT10006_01",
-			        "siteName": "Cut Bank",
-			        "agencyName": "Montana DEQ",
-			        "timezone": "America/Denver",
-			        "dataSource": "AIRNOW",
-			        "telemetryAggregator": null,
-			        "telemetryUnitID": null,
-			        "processingTime": "2021-02-15 18:48:45",
-			        "lastValidUTCTime": "2021-02-11 16:00:00",
-			        "lastValidLocalTime": "2021-02-11 16:00:00 UTC",
-			        "PM2.5_nowcast": null,
-			        "PM2.5_1hr": 0,
-			        "PM2.5_3hr": 0,
-			        "PM2.5_yesterday": null,
-			        "latency": 97,
-			        "monitoringSiteUrl": "http://tools.airfire.org/monitoring/v4/#!/?monitors=MMMT10006_01"
-			      },
-			      "geometry": {
-			        "type": "Point",
-			        "coordinates": [
-			          -112.3638,
-			          48.6074
-			        ]
-			      }
-			    },
-			    {
-			      "type": "Feature",
-			      "id": 2,
-			      "properties": {
-			        "monitorID": "CC0050138_01",
-			        "siteName": "York-Roberval",
-			        "agencyName": "Canada-Quebec2",
-			        "timezone": "America/New_York",
-			        "dataSource": "AIRNOW",
-			        "telemetryAggregator": null,
-			        "telemetryUnitID": null,
-			        "processingTime": "2021-02-15 18:48:45",
-			        "lastValidUTCTime": "2021-02-12 03:00:00",
-			        "lastValidLocalTime": "2021-02-12 03:00:00 UTC",
-			        "PM2.5_nowcast": 7.6,
-			        "PM2.5_1hr": 7,
-			        "PM2.5_3hr": 7.4,
-			        "PM2.5_yesterday": null,
-			        "latency": 86,
-			        "monitoringSiteUrl": "http://tools.airfire.org/monitoring/v4/#!/?monitors=CC0050138_01"
-			      },
-			      "geometry": {
-			        "type": "Point",
-			        "coordinates": [
-			          -73.5669,
-			          45.5122
-			        ]
-			      }
-			    }
-			  ]
-			};
-
-			/**
-			 * Load the test monitors GeoJSON and add them to the map as markers.
-			 */ 
-			L.geoJSON(testMonitorFeatures, {
-			    onEachFeature: onEachMonitorFeature
-			}).addTo(monitorMap);
 
 			/**
 		   	 * Open the date input field as a DateRangerPicker widget, and set the 
