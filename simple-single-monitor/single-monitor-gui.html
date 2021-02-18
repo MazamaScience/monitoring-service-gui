@@ -493,52 +493,35 @@
 			 * @param error  the error message string from the server
 			 */
 			function handleServerError(serverErrorString) {
-				// Define regex test patterns for common errors
+				// Define regex test patterns for common server-side errors
 				const nonexistantMonitorIDPattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in monitor_subset\(ws_monitor1, monitorIDs = monitorID\) : ↵  ws_monitor object contains zero monitors↵$/;
-				const dateRangeBefore1998Pattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in monitor_loadAnnual\(year, parameter, baseUrl, dataDir, aqsPreference\) : ↵  PWFSL has processed no data prior to 1998\.↵$/;
-				const dailybarplotFutureDateRangePattern = /^Error : Error in if \(!timezone %in% base::OlsonNames\(\)\) stop\(paste0\("Timezone '",  : ↵  argument is of length zero↵$/;
-				const dailybyhourFutureDateRangePattern = /^Error : Error in AirMonitorPlots::monitor_ggDailyByHour\(ws_monitor = dataList\$ws_monitor,  : ↵  Both 'startdate' and 'enddate' are outside the 'ws_monitor' time range↵$/;
-				const timeseriesFutureDateRangePattern = /^Error : Error in AirMonitorPlots::monitor_ggTimeseries\(ws_monitor = dataList\$ws_monitor,  : ↵  Invalid timezone↵$/;
 				const multiYearDateRangePattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in PWFSLSmoke::monitor_load\(startdate = startdate, enddate = enddate,  : ↵  Requests covering multiple years are not supported↵$/;
 				const noReadingsInDateRangePattern1 = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: \$ operator is invalid for atomic vectors↵$/;
 				const noReadingsInDateRangePattern2 = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in monitor_subset\(ws_monitor, tlim = c\(starttime, endtime\)\) : ↵  ws_monitor object contains zero monitors↵$/;
 
 				// Replace all line breaks in the server error string with a "↵" character
 				const stringifiedError = serverErrorString.replace(/(\r\n|\n|\r)/gm, "↵");
-				console.log(stringifiedError);
 
 				// Default error box message if the server error string doesn't match an existing test pattern
 				let errorBoxMessage = serverErrorString;
 
 				// Test if the server error string matches a pattern. If so, generate the corresponding error box message
 				if (nonexistantMonitorIDPattern.test(stringifiedError)) {
-
-					const monitorId = $("#monitorId").val();
-					errorBoxMessage = "Could not find monitor with ID: '" + monitorId + "'.";
-
-				} else if (dateRangeBefore1998Pattern.test(stringifiedError)) {
-
-					errorBoxMessage = "PWFSL has processed no data prior to 1998.";
-
-				} else if (dailybarplotFutureDateRangePattern.test(stringifiedError) ||
-					dailybyhourFutureDateRangePattern.test(stringifiedError) || 
-					timeseriesFutureDateRangePattern.test(stringifiedError)) {
-
-					errorBoxMessage = "Both start and end date have not occurred yet.";
-
+					errorBoxMessage = "Could not find monitor with ID: '" + $("#monitorId").val() + "'.";
 				} else if (multiYearDateRangePattern.test(stringifiedError)) {
-
 					errorBoxMessage = "Date range cannot span multiple years.";
-
 				} else if (noReadingsInDateRangePattern1.test(stringifiedError) ||
 					noReadingsInDateRangePattern2.test(stringifiedError)) {
-
 					errorBoxMessage = "Monitor has no data readings in this date range.";
-
 				} 
 
+				// Display final message in the error message box
 				showErrorBox(errorBoxMessage);
 			}
+
+			$("#error-box").on("click", function () {
+        		hideErrorBox();
+    		});
 		});
 	</script>
 </body>
