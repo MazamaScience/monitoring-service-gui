@@ -114,22 +114,17 @@
 		
 		#error-box {
 		  	width: 80%;
-		  	min-width: 200px;
-			margin: auto;
 			padding: 15px;
 			position: absolute;
 			top: 10%;
   			left: 50%;
   			transform: translate(-50%, -50%);
+  			z-index: 1000;
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
-			border: 1px solid Red;
-			border-radius: 5px;
-			background-color: #ffe3e3;
-			font-family: monospace;
-			z-index: 3000;
+			border: 2px solid Red;
 		}
 		
 		#error-box h1 {
@@ -139,6 +134,7 @@
 		
 		#error-box p {
 		  margin: 0px;
+		  font-family: monospace;
 		}
 
 		#instructions-section {
@@ -282,9 +278,12 @@
 	<div id="content-area">
 		<div id="plot-container">
 			<div id="leaflet-map"></div>
-			<div id="error-box" class="invisible">
+			<div id="error-box" class="alert alert-danger alert-dismissible invisible">
 				<h1>ERROR</h1>
 				<p id="eror-box-message"></p>
+				<button type="button" class="close" aria-label="Close">
+    				<span aria-hidden="true">&times;</span>
+  				</button>
 			</div>	
 		</div>
 	</div>
