@@ -280,7 +280,7 @@
 			<div id="leaflet-map"></div>
 			<div id="error-box" class="alert alert-danger alert-dismissible invisible">
 				<h1>ERROR</h1>
-				<p id="eror-box-message"></p>
+				<p id="error-box-message"></p>
 				<button type="button" class="close" aria-label="Close">
     				<span aria-hidden="true">&times;</span>
   				</button>
@@ -425,7 +425,7 @@
 			// Show error box
 			function showErrorBox(errorMessage) {
 			  	// Set error box text
-		    	$("#eror-box-message").text(errorMessage);
+		    	$("#error-box-message").text(errorMessage);
 		    
 				$("#error-box").removeClass("invisible");
 				$("#error-box").addClass("visible");
