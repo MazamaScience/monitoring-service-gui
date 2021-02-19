@@ -374,9 +374,10 @@
 						   .openOn(monitorMap);
 					});
 
-					// Highlight the marker when clicked
+					// React when the marker is clicked
 					monitorMarker.on('click', function(e) {
-						// Populate the monitor ID textbox
+						// Focus on and populate the monitor ID input field
+						$("#monitorId").focus();
 		        		$("#monitorId").val(monitorId);
 
 		        		// Un-highlight the previously selected monitor marker
@@ -527,9 +528,9 @@
 			}
 
 			/**
-			 * Hide the error box when it is clicked.
+			 * Hide the error box when its close button is clicked.
 			 */
-			$("#error-box").on("click", function () {
+			$(".close").on("click", function () {
         		hideErrorBox();
     		});
 		});
