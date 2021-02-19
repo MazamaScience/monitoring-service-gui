@@ -144,7 +144,8 @@
 		}
 
 		#instructions-details {
-			padding-right: 15px;		}
+			padding-right: 15px;
+		}
 
 		#instructions-section h1 {
 			font-size: 1.5rem;
@@ -180,6 +181,10 @@
 
 			#inputs-section {
 				width: auto;
+			}
+
+			#daterange {
+				width: 210px;
 			}
 
 			#query-inputs-section {
@@ -239,13 +244,13 @@
 	  				<!-- Monitor ID input -->
 		  			<div class="form-group text-input">
 		  				<label>Monitor ID</label>
-		  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId" size="2">
+		  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId">
 		  			</div>
 		  
 		  			<!-- Time range input -->
 		  			<div class="form-group text-input">
 		  				<label>Date range</label>
-		  				<input id="daterange" type="text" class="form-control" name="daterange" value=""/>
+		  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
 		  			</div>
 	  			</div>
   			</div>
@@ -368,10 +373,11 @@
 
 					// Open a popup when the marker is hovered over
 					monitorMarker.on('mouseover', function(e) {
-						  var popup = L.popup({autoPan: false})
-						   .setLatLng(e.latlng) 
-						   .setContent(monitorId)
-						   .openOn(monitorMap);
+						var popup = 
+							L.popup({autoPan: false})
+							.setLatLng(e.latlng) 
+						   	.setContent(monitorId)
+						   	.openOn(monitorMap);
 					});
 
 					// React when the marker is clicked
@@ -465,8 +471,8 @@
 				
 				// Build plot request query string
 				const queryParams = 
-				  "databaseversion=4.0" +
-				  "&webserviceapi=4.0" + 
+					"databaseversion=4.0" +
+				  	"&webserviceapi=4.0" + 
 					"&plottype="  + plotType +
 					"&monitorid=" + monitorId +
 					"&startdate=" + startDate +
