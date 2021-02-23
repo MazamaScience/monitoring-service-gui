@@ -65,6 +65,10 @@
 			align-items: center;
 		}
 
+		#update-map-button {
+			font-size: 12px;
+		}
+
 		#action-buttons-section {
 			width: 100%;
 			display: flex;
@@ -229,11 +233,17 @@
   				<!-- Text inputs -->
 	  			<div id="text-inputs">
 	  				<!-- Time range input -->
-		  			<div class="form-group text-input">
-		  				<label>Date range</label>
-		  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
-		  			</div>
+	  				<div class="mb-3">
+	  					<div class="form-group text-input mb-0">
+			  				<label>Date range</label>
+			  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
+		  				</div>
 
+		  				<button id="update-map-button" class="btn btn-info" type="button">
+							Update map
+						</button>
+	  				</div>
+		  			
 	  				<!-- Monitor ID input -->
 		  			<div class="form-group text-input">
 		  				<label>Monitor ID</label>
@@ -292,44 +302,37 @@
 
 	<script type="text/javascript">
 		$(function() {
-			//const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/"; // Production
-		  	//const plotServicePath = "https://test.airfire.org/monitor-plot/test/"; // Test 
-		  	//const plotServicePath = "http://localhost:8080/monitor-plot/dev/"; // RStudio test
-		  	//const plotServicePath = "http://localhost:8080/monitor-plot/test/" // Local Docker test
-		  	const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
-		  	const plotServiceName = "plot";
+			// ----- Functions ----------------------------------------------------------------------------------------------------------
 
-		  	const monitorsGeoJSONPath = "https://tools.airfire.org/monitor-data/v4/geojson";
+			/**
+			 * Builds the URL request for monitors GeoJSON using form input.
+			 */
+			function buildMonitorsGeoJsonRequestUrl() {
+				const dateRange = $("input[name=daterange]").val().split(" - ");
 
-		  	// Create the Leaflet map centered on the continental US
-			var monitorMap = L.map('leaflet-map', {
-				preferCanvas: true
-			}).setView([39.5, -98.35], 3);
+				// Convert format of input date range
+				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
+				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
+				
+				// Build plot request query string
+				const queryParams = 
+					"startdate=" + startDate +
+					"&enddate="   + endDate;
 
-			// Create a canvas layer
-			var mapRenderer = L.canvas({ padding: 0.5 });
+				// Build full monitors GeoJSON request URL
+				const monitorsGeoJsonRequestUrl = dataServicePath + geoJsonServiceName + "?" + queryParams;
 
-			// Create a Stamen tile layer and add it to the map
-			var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
-				attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-				subdomains: 'abcd',
-				minZoom: 3,
-				maxZoom: 15,
-				ext: 'png'
-			}).addTo(monitorMap);
-
-			addMonitorMarkers();
-
-			var selectedMonitor = null;
+				return monitorsGeoJsonRequestUrl;
+			}
 
 			/**
 			 * Fetch and load the monitors GeoJSON file from AirFire. Then display them on the map as markers.
 			 */
-			function addMonitorMarkers() {
-		        fetch(monitorsGeoJSONPath, { mode: 'cors' })
+			function addMonitorMarkers(monitorsGeoJsonRequestURL) {
+		        fetch(monitorsGeoJsonRequestURL, { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
-						// Create a marker for each monitor feature
+						// Create and add a marker for each monitor feature
 						L.geoJSON(data, {
 						    onEachFeature: createMonitorMarker
 						});
@@ -409,71 +412,6 @@
 			}
 
 			/**
-		   	 * Open the date input field as a DateRangerPicker widget, and set the 
-		   	 * initial date range to the last 10 days.
-		   	 */
-			$("input[name=daterange]").daterangepicker({
-				startDate: moment().subtract(10, "day").startOf("day").toDate(),
-        		endDate: moment().startOf("day").toDate(),
-        		minDate: "01/01/1998",
-        		maxDate: moment().startOf("day").toDate(),
-				opens: "left"
-			}, function(start, end, label) {});
-
-			/**
-			 * Generate a "dailybarplot" plot on button click.
-			 */
-			$("#daily-average-plot-button").click(function() {
-				hideErrorBox();
-			 	generatePlot("dailybarplot");
-			});
-
-			/**
-			 * Generate a "dailybyhour" plot on button click.
-			 */
-			$("#time-of-day-plot-button").click(function() {
-				hideErrorBox();
-			 	generatePlot("dailybyhour");
-			});
-
-			/**
-			 * Generate a "timeseries" plot on button click.
-			 */
-			$("#time-series-plot-button").click(function() {
-				hideErrorBox();
-			 	generatePlot("timeseries");
-			});
-			
-			// Show error box
-			function showErrorBox(errorMessage) {
-			  	// Set error box text
-		    	$("#error-box-message").text(errorMessage);
-		    
-				$("#error-box").removeClass("invisible");
-				$("#error-box").addClass("visible");
-			}
-			
-			// Hide the error box
-			function hideErrorBox() {
-				$("#error-box").removeClass("visible");
-				$("#error-box").addClass("invisible");
-			}
-			
-			/**
-			 * Builds a plot request and sets the plot image to the resulting URL.
-			 * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
-			 */
-			function generatePlot(plotType) {
-				const plotRequestURL = buildPlotRequestURL(plotType);
-			  
-				console.log("Plot request URL: " + plotRequestURL);
-			  
-			  	if (plotRequestURL != null) {
-			    	window.open(plotRequestURL, '_blank');
-			  	}
-			}
-
-	      	/**
 	         * Builds a URL request to the plot service API using form input.
 	         * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
 	         */
@@ -518,6 +456,20 @@
 				
 				return plotRequestURL;
 			}
+			
+			/**
+			 * Builds a plot request and sets the plot image to the resulting URL.
+			 * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
+			 */
+			function generatePlot(plotType) {
+				const plotRequestURL = buildPlotRequestURL(plotType);
+			  
+				console.log("Plot request URL: " + plotRequestURL);
+			  
+			  	if (plotRequestURL != null) {
+			    	window.open(plotRequestURL, '_blank');
+			  	}
+			}
 
 			/**
 			 * Handles server side errors by displaying them in an error message box. Some common errors are translated to more user-friendly text.
@@ -551,11 +503,125 @@
 			}
 
 			/**
+		   	 * Open the date input field as a DateRangerPicker widget, and set the 
+		   	 * initial date range to the last 10 days.
+		   	 */
+			$("input[name=daterange]").daterangepicker({
+				startDate: moment().subtract(10, "day").startOf("day").toDate(),
+        		endDate: moment().startOf("day").toDate(),
+        		minDate: "01/01/1998",
+        		maxDate: moment().startOf("day").toDate(),
+				opens: "left"
+			}, function(start, end, label) {});
+
+			/**
+			 * Update the map's monitor markers on button click.
+			 */
+			$("#update-map-button").click(function() {
+				// Clear the monitor map of all layers
+				monitorMap.eachLayer((layer) => {
+					layer.remove();
+				});
+
+				// Create a Stamen tile layer and add it to the map
+				var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
+					attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+					subdomains: 'abcd',
+					minZoom: 3,
+					maxZoom: 15,
+					ext: 'png'
+				}).addTo(monitorMap);
+
+				// Add monitor markers to the map for the input date range
+				const monitorsGeoJsonRequestUrl = buildMonitorsGeoJsonRequestUrl();
+
+				console.log("GeoJSON request URL: " + monitorsGeoJsonRequestUrl);
+
+				addMonitorMarkers(monitorsGeoJsonRequestUrl);
+			});
+
+			/**
+			 * Generate a "dailybarplot" plot on button click.
+			 */
+			$("#daily-average-plot-button").click(function() {
+				hideErrorBox();
+			 	generatePlot("dailybarplot");
+			});
+
+			/**
+			 * Generate a "dailybyhour" plot on button click.
+			 */
+			$("#time-of-day-plot-button").click(function() {
+				hideErrorBox();
+			 	generatePlot("dailybyhour");
+			});
+
+			/**
+			 * Generate a "timeseries" plot on button click.
+			 */
+			$("#time-series-plot-button").click(function() {
+				hideErrorBox();
+			 	generatePlot("timeseries");
+			});
+			
+			// Show error box
+			function showErrorBox(errorMessage) {
+			  	// Set error box text
+		    	$("#error-box-message").text(errorMessage);
+		    
+				$("#error-box").removeClass("invisible");
+				$("#error-box").addClass("visible");
+			}
+			
+			// Hide the error box
+			function hideErrorBox() {
+				$("#error-box").removeClass("visible");
+				$("#error-box").addClass("invisible");
+			}
+
+			/**
 			 * Hide the error box when its close button is clicked.
 			 */
 			$(".close").on("click", function () {
         		hideErrorBox();
     		});
+
+    		// ----- Script start ------------------------------------------------------------------------
+
+    		//const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/"; // Production
+		  	//const plotServicePath = "https://test.airfire.org/monitor-plot/test/"; // Test 
+		  	//const plotServicePath = "http://localhost:8080/monitor-plot/dev/"; // RStudio test
+		  	//const plotServicePath = "http://localhost:8080/monitor-plot/test/" // Local Docker test
+
+		  	// Service for plot products
+		  	const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
+		  	const plotServiceName = "plot";
+
+		  	// Service for monitor GeoJSON products
+		  	const dataServicePath = "https://tools.airfire.org/monitor-data/v4/";
+		  	const geoJsonServiceName = "geojson";
+
+		  	// Create the Leaflet map centered on the continental US
+			var monitorMap = L.map('leaflet-map', {
+				preferCanvas: true
+			}).setView([39.5, -98.35], 3);
+
+			// Create a canvas layer
+			var mapRenderer = L.canvas({ padding: 0.5 });
+
+			// Create a Stamen tile layer and add it to the map
+			var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
+				attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+				subdomains: 'abcd',
+				minZoom: 3,
+				maxZoom: 15,
+				ext: 'png'
+			}).addTo(monitorMap);
+
+			// Add monitor markers to the map for the initial date range
+			addMonitorMarkers(buildMonitorsGeoJsonRequestUrl());
+
+			var selectedMonitor = null;
 		});
 	</script>
 </body>
