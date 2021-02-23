@@ -194,6 +194,10 @@
 				justify-content: center;
 			}
 
+			#text-inputs {
+				margin-right: 10px;
+			}
+
 			#plot-type-list {
 				margin-right: 30px;
 			}
@@ -221,7 +225,7 @@
   		<div id="inputs-section" class="mb-2">
   			<div id="query-inputs-section">
   				<!-- Text inputs -->
-	  			<div class="mb-2">
+	  			<div id="text-inputs">
 	  				<!-- Time range input -->
 		  			<div class="form-group text-input">
 		  				<label>Date range</label>
@@ -236,24 +240,23 @@
 	  			</div>
 
   				<!-- Plot type input -->
-	  			<div id="plot-type-list" class="form-group mb-3">
-	  				<label>Plot type</label>
+  				<div id="plot-type-buttons" class="mb-4">
+  					<label>Plot type</label>
 
-					<div class="form-check">
-						<input class="form-check-input" type="radio" name="plot-type" value="dailybarplot" checked>
-						<label class="form-check-label">Daily average</label>
-					</div>
+  					<div class="d-flex flex-column align-items-stretch">
+  						<button id="daily-average-plot-button" class="btn btn-success mb-1" type="button">
+							Daily average
+						</button>
 
-					<div class="form-check">
-						<input class="form-check-input" type="radio" name="plot-type" value="dailybyhour">
-						<label class="form-check-label">Time of day</label>
-					</div>
+						<button id="time-of-day-plot-button" class="btn btn-success mb-1" type="button">
+							Time of day
+						</button>
 
-					<div class="form-check">
-						<input class="form-check-input" type="radio" name="plot-type" value="timeseries">
-						<label class="form-check-label">Time series</label>
-					</div>
-	  			</div>			
+						<button id="time-series-plot-button" class="btn btn-success" type="button">
+							Time series
+						</button>
+  					</div>
+  				</div>			
   			</div>
 
   			<!-- How-to and GO buttons -->
@@ -261,22 +264,16 @@
 	  			<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#instructions-details">
 					How-to
 				</button>
-
-				<button id="generate-button" class="btn btn-success" type="button">
-					GO
-				</button>
 	  		</div>
   		</div>
 	
 		<div id="instructions-section">
 			<div id="instructions-details" class="collapse">
 				<ol>
-			  	    <li>Select which type of plot you would like to generate.</li>
-			  	    <li>Type in the ID of the monitor you would like to inspect. You can find a monitor's ID by clicking on its icon in <a href="https://tools.airfire.org/monitoring" target="_blank">this map</a> and scrolling down to the "Selected Monitors" list at the bottom of the page.</li>
-			  	    <li>Select the date range by clicking on the date widget. You can type  in the start and end dates or select a start and end day in the calendar popup.</li>
+					<li>First, select the date range the plot should cover.</li>
+			  	    <li>Next, enter the ID of the monitor you would like to inspect. You can either type it in or click on its marker on the map to fill out the text box.</li>
+			  	    <li>Finally, click on the button for the plot type you would like to generate. The plot will open in a new tab.</li>
 			  	</ol>
-			  	  
-			  	<p>Changing any of the fields will automatically generate a plot. The image itself may take a few seconds to load.</p>
 			</div>
 		</div>
 	</div>
@@ -424,9 +421,28 @@
 				opens: "left"
 			}, function(start, end, label) {});
 
-			$("#generate-button").click(function() {
+			/**
+			 * Generate a "dailybarplot" plot on button click.
+			 */
+			$("#daily-average-plot-button").click(function() {
 				hideErrorBox();
-			 	updatePlot();
+			 	generatePlot("dailybarplot");
+			});
+
+			/**
+			 * Generate a "dailybyhour" plot on button click.
+			 */
+			$("#time-of-day-plot-button").click(function() {
+				hideErrorBox();
+			 	generatePlot("dailybyhour");
+			});
+
+			/**
+			 * Generate a "timeseries" plot on button click.
+			 */
+			$("#time-series-plot-button").click(function() {
+				hideErrorBox();
+			 	generatePlot("timeseries");
 			});
 			
 			// Show error box
@@ -445,10 +461,11 @@
 			}
 			
 			/**
-			 * Builds a plot request and sets the plot image to the resulting URL. 
+			 * Builds a plot request and sets the plot image to the resulting URL.
+			 * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
 			 */
-			function updatePlot() {
-				const plotRequestURL = buildPlotRequestURL();
+			function generatePlot(plotType) {
+				const plotRequestURL = buildPlotRequestURL(plotType);
 			  
 				console.log("Plot request URL: " + plotRequestURL);
 			  
@@ -459,10 +476,10 @@
 
 	      	/**
 	         * Builds a URL request to the plot service API using form input.
+	         * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
 	         */
-			function buildPlotRequestURL() {
+			function buildPlotRequestURL(plotType) {
 				// Get form input
-				const plotType  = $("input[name=plot-type]:checked").val();
 				const monitorId = $("#monitorId").val();
 				const dateRange = $("input[name=daterange]").val().split(" - ");
 
