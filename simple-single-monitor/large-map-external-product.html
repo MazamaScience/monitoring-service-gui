@@ -220,6 +220,21 @@
 		<!-- Inputs -->
   		<div id="inputs-section" class="mb-2">
   			<div id="query-inputs-section">
+  				<!-- Text inputs -->
+	  			<div class="mb-2">
+	  				<!-- Time range input -->
+		  			<div class="form-group text-input">
+		  				<label>Date range</label>
+		  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
+		  			</div>
+
+	  				<!-- Monitor ID input -->
+		  			<div class="form-group text-input">
+		  				<label>Monitor ID</label>
+		  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId">
+		  			</div>
+	  			</div>
+
   				<!-- Plot type input -->
 	  			<div id="plot-type-list" class="form-group mb-3">
 	  				<label>Plot type</label>
@@ -238,22 +253,7 @@
 						<input class="form-check-input" type="radio" name="plot-type" value="timeseries">
 						<label class="form-check-label">Time series</label>
 					</div>
-	  			</div>
-	  
-	  			<!-- Text inputs -->
-	  			<div class="mb-2">
-	  				<!-- Monitor ID input -->
-		  			<div class="form-group text-input">
-		  				<label>Monitor ID</label>
-		  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId">
-		  			</div>
-		  
-		  			<!-- Time range input -->
-		  			<div class="form-group text-input">
-		  				<label>Date range</label>
-		  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
-		  			</div>
-	  			</div>
+	  			</div>			
   			</div>
 
   			<!-- How-to and GO buttons -->
