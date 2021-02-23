@@ -59,6 +59,7 @@
 
 		#inputs-section {
 			width: 100%;
+			margin-bottom: 25px;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
@@ -182,6 +183,7 @@
 
 			#inputs-section {
 				width: auto;
+				margin-bottom: 0px;
 			}
 
 			#daterange {
@@ -222,7 +224,7 @@
 		</div>
 
 		<!-- Inputs -->
-  		<div id="inputs-section" class="mb-2">
+  		<div id="inputs-section" class="">
   			<div id="query-inputs-section">
   				<!-- Text inputs -->
 	  			<div id="text-inputs">
@@ -240,7 +242,7 @@
 	  			</div>
 
   				<!-- Plot type input -->
-  				<div id="plot-type-buttons" class="mb-4">
+  				<div id="plot-type-buttons">
   					<label>Plot type</label>
 
   					<div class="d-flex flex-column align-items-stretch">
@@ -258,16 +260,13 @@
   					</div>
   				</div>			
   			</div>
-
-  			<!-- How-to and GO buttons -->
-  			<div id="action-buttons-section">
-	  			<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#instructions-details">
-					How-to
-				</button>
-	  		</div>
   		</div>
 	
 		<div id="instructions-section">
+			<button class="btn btn-secondary mb-2" type="button" data-toggle="collapse" data-target="#instructions-details">
+				How-to
+			</button>
+
 			<div id="instructions-details" class="collapse">
 				<ol>
 					<li>First, select the date range the plot should cover.</li>
