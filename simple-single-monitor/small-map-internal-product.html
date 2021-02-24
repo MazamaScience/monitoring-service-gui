@@ -292,6 +292,7 @@
 
 	<div id="content-area">
 		<div id="plot-container">
+			<img id="plot-image" src="" class="">
 			<div id="error-box" class="alert alert-danger alert-dismissible invisible">
 				<h1>ERROR</h1>
 				<p id="error-box-message"></p>
@@ -444,7 +445,8 @@
 				console.log("Plot request URL: " + plotRequestURL);
 			  
 			  	if (plotRequestURL != null) {
-			    	window.open(plotRequestURL, '_blank');
+			    	// Update plot image source
+					$("#plot-image").attr("src", plotRequestURL);
 			  	}
 			}
 
