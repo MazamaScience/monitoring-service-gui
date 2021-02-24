@@ -559,16 +559,21 @@
 			 	generatePlot("timeseries");
 			});
 			
-			// Show error box
-			function showErrorBox(errorMessage) {
+			/** 
+			 * Show the error box with a message.
+			 * @param message  the message to display
+			 */
+			function showErrorBox(message) {
 			  	// Set error box text
-		    	$("#error-box-message").text(errorMessage);
+		    	$("#error-box-message").text(message);
 		    
 				$("#error-box").removeClass("invisible");
 				$("#error-box").addClass("visible");
 			}
 			
-			// Hide the error box
+			/**
+			 * Hide the error box.
+			 */
 			function hideErrorBox() {
 				$("#error-box").removeClass("visible");
 				$("#error-box").addClass("invisible");
