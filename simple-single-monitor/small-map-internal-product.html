@@ -110,7 +110,27 @@
 		#plot-container {
 			height: 100%;
 			margin: auto;
+			padding: 40px;
 			position: relative;
+		}
+
+		#plot-image {
+			max-height: 100%;
+			box-shadow: 0px 0px 10px gray;
+		}
+
+		#loading-spinner {
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			width: 100px;
+			height: 100px;
+			transform-origin: 0% 0%;
+			border: 12px solid WhiteSmoke;
+			border-top: 12px solid #007bff;
+			border-radius: 50%;
+			animation: spin 0.45s linear infinite;
+			-webkit-animation: spin 0.45s linear infinite; /* Safari */
 		}
 
 		#leaflet-map {
@@ -218,6 +238,17 @@
 				font-size: 0.7rem;
 			}
 		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg) translate(-50%, -50%); }
+			100% { transform: rotate(360deg) translate(-50%, -50%); }
+		}
+
+		/* Safari */
+		@-webkit-keyframes spin {
+			0% { -webkit-transform: rotate(0deg) translate(-50%, -50%); }
+			100% { -webkit-transform: rotate(360deg) translate(-50%, -50%); }
+		}
 	</style>
 </head>
 
@@ -292,14 +323,19 @@
 
 	<div id="content-area">
 		<div id="plot-container">
-			<img id="plot-image" src="" class="">
+			<img id="plot-image" src="" class="invisible">
+
 			<div id="error-box" class="alert alert-danger alert-dismissible invisible">
 				<h1>ERROR</h1>
+
 				<p id="error-box-message"></p>
+
 				<button type="button" class="close" aria-label="Close">
     				<span aria-hidden="true">&times;</span>
   				</button>
-			</div>	
+			</div>
+
+			<div id="loading-spinner" class="invisible"></div>
 		</div>
 	</div>
 
@@ -447,6 +483,14 @@
 			  	if (plotRequestURL != null) {
 			    	// Update plot image source
 					$("#plot-image").attr("src", plotRequestURL);
+
+					// Hide plot image
+					$("#plot-image").removeClass("visible");
+					$("#plot-image").addClass("invisible");
+
+					// Show loading spinner
+					$("#loading-spinner").removeClass("invisible");
+					$("#loading-spinner").addClass("visible");
 			  	}
 			}
 
@@ -567,6 +611,19 @@
 			$("#time-series-plot-button").click(function() {
 			 	generatePlot("timeseries");
 			});
+
+			/**
+			 * React when the plot image loads.
+			 */
+			document.getElementById("plot-image").onload = function() {
+				// Hide loading spinner
+				$("#loading-spinner").removeClass("visible");
+				$("#loading-spinner").addClass("invisible");
+
+				// Show plot image
+				$("#plot-image").removeClass("invisible");
+				$("#plot-image").addClass("visible");
+			}
 			
 			/** 
 			 * Show the error box with a message.
@@ -578,6 +635,10 @@
 		    
 				$("#error-box").removeClass("invisible");
 				$("#error-box").addClass("visible");
+
+				// Hide loading spinner
+				$("#loading-spinner").removeClass("visible");
+				$("#loading-spinner").addClass("invisible");
 			}
 			
 			/**
