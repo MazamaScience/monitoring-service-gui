@@ -1,0 +1,641 @@
+<!--
+	This is a simple web interface for generating products from service requests. It has a basic toolbar on the left and a large interactive map on the right that can be used to specify request parameters. Generated products are opened externally in a new browser tab.
+-->
+
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Monitor Plots</title>
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+
+	<!-- JavaScript -->	
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+	
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+	<style type="text/css">
+		body {
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			flex-direction: row;
+			align-items: stretch;
+			background-color: WhiteSmoke;
+		}
+
+		h1 {
+			font-size: 32px;
+			text-align: center;
+			margin-bottom: 16px;
+		}
+
+		input {
+			margin-bottom: 5px;
+		}
+
+		#toolbar {
+			width: 280px;
+			min-width: 280px;
+			height: 100vh;
+			padding: 0px 20px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background-color: White;
+			box-shadow: gray 0px 0px 15px;
+			z-index: 2;
+		}
+
+		#inputs-section {
+			width: 100%;
+			margin-bottom: 25px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		#update-map-button {
+			font-size: 12px;
+		}
+
+		#action-buttons-section {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-around;
+		}
+
+		#action-buttons-section button {
+			width: 90px;
+		}
+
+		#query-inputs-section {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+		}
+
+		label {
+			font-weight: bold;
+			margin-bottom: 2px;
+		}
+
+		label.form-check-label {
+			font-weight: normal;
+		}
+
+		.text-input {
+			display: flex;
+			flex-direction: column;
+		}
+
+		#content-area {
+			flex-grow: 1;
+			position: relative;
+			z-index: 1;
+		}
+
+		#plot-container {
+			height: 100%;
+			margin: auto;
+			position: relative;
+		}
+
+		#leaflet-map {
+			width: 100%;
+			height: 100%;
+		}
+		
+		#error-box {
+			min-width: 250px;
+			max-width: 800px;
+			padding: 15px;
+			position: absolute;
+			top: 2%;
+  			left: 50%;
+  			transform: translate(-50%, 0%);
+  			z-index: 1000;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			border: 2px solid Red;
+		}
+		
+		#error-box h1 {
+		  font-size: 22px;
+		  color: Red;
+		}
+		
+		#error-box p {
+		  margin: 0px;
+		  font-family: monospace;
+		}
+
+		#instructions-section {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		#instructions-details {
+			padding-right: 15px;
+		}
+
+		#instructions-section h1 {
+			font-size: 1.5rem;
+		}
+
+		#instructions-section ol {
+			font-size: 0.8rem;
+		}
+
+		#instructions-section p {
+			font-size: 0.7rem;
+		}
+
+		.visible {
+			display: block;
+		}
+
+		.invisible {
+			display: none;
+		}
+
+		/* Small devices (landscape phones, less than 768px) */
+		@media (max-width: 769px) {
+			body {
+				flex-direction: column;
+			}
+
+			#toolbar {
+				width: 100vw;
+				height: auto;
+				padding: 0px 15px;
+			}
+
+			#inputs-section {
+				width: auto;
+				margin-bottom: 0px;
+			}
+
+			#daterange {
+				width: 210px;
+			}
+
+			#query-inputs-section {
+				margin: auto;
+				flex-direction: row;
+				justify-content: center;
+			}
+
+			#text-inputs {
+				margin-right: 10px;
+			}
+
+			#plot-type-list {
+				margin-right: 30px;
+			}
+
+			#instructions-section ol {
+				font-size: 0.8rem;
+			}
+
+			#instructions-section p {
+				text-align: center;
+				font-size: 0.7rem;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div id="toolbar" class="pb-1">
+		<!-- page title -->
+		<div>
+			<h1>Single-Monitor Plots</h1>
+		</div>
+
+		<!-- Inputs -->
+  		<div id="inputs-section" class="">
+  			<div id="query-inputs-section">
+  				<!-- Text inputs -->
+	  			<div id="text-inputs">
+	  				<!-- Time range input -->
+	  				<div class="mb-3">
+	  					<div class="form-group text-input mb-0">
+			  				<label>Date range</label>
+			  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
+		  				</div>
+
+		  				<button id="update-map-button" class="btn btn-info" type="button">
+							Update map
+						</button>
+	  				</div>
+		  			
+	  				<!-- Monitor ID input -->
+		  			<div class="form-group text-input">
+		  				<label>Monitor ID</label>
+		  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId">
+		  			</div>
+	  			</div>
+
+  				<!-- Plot type input -->
+  				<div id="plot-type-buttons">
+  					<label>Plot type</label>
+
+  					<div class="d-flex flex-column align-items-stretch">
+  						<button id="daily-average-plot-button" class="btn btn-success mb-1" type="button">
+							Daily average
+						</button>
+
+						<button id="time-of-day-plot-button" class="btn btn-success mb-1" type="button">
+							Time of day
+						</button>
+
+						<button id="time-series-plot-button" class="btn btn-success" type="button">
+							Time series
+						</button>
+  					</div>
+  				</div>			
+  			</div>
+  		</div>
+	
+		<div id="instructions-section">
+			<button class="btn btn-secondary mb-2" type="button" data-toggle="collapse" data-target="#instructions-details">
+				How-to
+			</button>
+
+			<div id="instructions-details" class="collapse">
+				<ol>
+					<li>First, select the date range the plot should cover.</li>
+			  	    <li>Next, enter the ID of the monitor you would like to inspect. You can either type it in or click on its marker on the map to fill out the text box.</li>
+			  	    <li>Finally, click on the button for the plot type you would like to generate. The plot will open in a new tab.</li>
+			  	</ol>
+			</div>
+		</div>
+	</div>
+
+	<div id="content-area">
+		<div id="plot-container">
+			<div id="leaflet-map"></div>
+			<div id="error-box" class="alert alert-danger alert-dismissible invisible">
+				<h1>ERROR</h1>
+				<p id="error-box-message"></p>
+				<button type="button" class="close" aria-label="Close">
+    				<span aria-hidden="true">&times;</span>
+  				</button>
+			</div>	
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$(function() {
+			/**
+			 * Loads and displays markers for monitors present in the current date range.
+			 */
+			function updateMap() {
+				// Remove all the markers from the map
+				monitorMarkersLayerGroup.clearLayers();
+
+				// Build request for the monitors in the current date range
+				const monitorsGeoJsonRequestUrl = buildMonitorsGeoJsonRequestUrl();
+
+				console.log("GeoJSON request URL: " + monitorsGeoJsonRequestUrl);
+
+				// Add monitor markers to the map
+				addMonitorMarkers(monitorsGeoJsonRequestUrl);
+			}
+
+			/**
+			 * Builds the URL request for monitors GeoJSON using form input.
+			 */
+			function buildMonitorsGeoJsonRequestUrl() {
+				const dateRange = $("input[name=daterange]").val().split(" - ");
+
+				// Convert format of input date range
+				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
+				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
+				
+				// Build plot request query string
+				const queryParams = 
+					"startdate=" + startDate +
+					"&enddate="   + endDate;
+
+				// Build full monitors GeoJSON request URL
+				const monitorsGeoJsonRequestUrl = dataServicePath + geoJsonServiceName + "?" + queryParams;
+
+				return monitorsGeoJsonRequestUrl;
+			}
+
+			/**
+			 * Fetches and loads a GeoJSON file of monitor features from AirFire, then displays them on the map as markers.
+			 * @param monitorsGeoJsonRequestUrl  the URL request for the monitors GeoJSON file
+			 */
+			function addMonitorMarkers(monitorsGeoJsonRequestUrl) {
+		        fetch(monitorsGeoJsonRequestUrl, { mode: 'cors' })
+					.then(response => response.json())
+					.then(data => {
+						// Create and add a marker for each monitor feature
+						L.geoJSON(data, {
+						    onEachFeature: createMonitorMarker
+						});
+					})
+					.catch(error => {
+						return null;
+					}
+				);
+			}
+
+			/**
+			 * Creates an interactive marker for a monitor GeoJSON feature and add it to the map.
+			 * @param monitorFeature  a monitor's GeoJSON feature description
+			 * @param layer  default marker layer provided for the monitorFeature (ignored)
+			 */
+			function createMonitorMarker(monitorFeature, layer) {
+				// Skip if the feature doesn't have a monitor ID
+			    if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) {
+			    	return;
+			    }
+
+		    	// Get monitor ID
+				const monitorId = monitorFeature.properties.monitorID;
+
+		    	// Get monitor coordinates
+		    	const coords = monitorFeature.geometry.coordinates;
+				const lon = coords[0];
+				const lat = coords[1];
+
+				// Create a circle marker for the monitor
+				var monitorMarker = L.circleMarker([lat, lon], {
+					renderer: mapRenderer,
+					radius: 8,
+					color: "#008800",
+					fillColor: "#66ff66",
+					fillOpacity: 0.6,
+					weight: 2
+				})
+
+				// Open a popup when the marker is clicked
+				//monitorMarker.bindPopup(monitorId);
+
+				// Open a popup when the marker is hovered over
+				monitorMarker.on('mouseover', function(e) {
+					var popup = 
+						L.popup({autoPan: false})
+						.setLatLng(e.latlng) 
+					   	.setContent(monitorId)
+					   	.openOn(monitorMap);
+				});
+
+				// React when the marker is clicked
+				monitorMarker.on('click', function(e) {
+					// Focus on and populate the monitor ID input field
+					$("#monitorId").focus();
+	        		$("#monitorId").val(monitorId);
+
+	        		// Un-highlight the previously selected monitor marker
+	        		if (selectedMonitor != null) {
+	        			selectedMonitor.setStyle({
+							color: "#008800",
+							fillColor: "#66ff66",
+							weight: 2,
+	        			});
+	        		} 
+
+	        		selectedMonitor = monitorMarker;
+
+	        		// Highlight the newly selected monitor
+	        		selectedMonitor.setStyle({
+	        			color: "#000000",
+	        			weight: 4
+	        		});
+
+	        		selectedMonitor.bringToFront();
+	       		});
+
+				// Add the marker to the map
+		        //monitorMarker.addTo(monitorMap);
+		        monitorMarker.addTo(monitorMarkersLayerGroup);
+			}
+
+			/**
+			 * Builds a plot request and sets the plot image to the resulting URL.
+			 * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
+			 */
+			function generatePlot(plotType) {
+				hideErrorBox();
+
+				const plotRequestURL = buildPlotRequestURL(plotType);
+			  
+				console.log("Plot request URL: " + plotRequestURL);
+			  
+			  	if (plotRequestURL != null) {
+			    	window.open(plotRequestURL, '_blank');
+			  	}
+			}
+
+			/**
+	         * Builds a URL request to the plot service API using form input.
+	         * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
+	         */
+			function buildPlotRequestURL(plotType) {
+				// Get form input
+				const monitorId = $("#monitorId").val();
+				const dateRange = $("input[name=daterange]").val().split(" - ");
+
+				// Convert format of input date range
+				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
+				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
+				
+				// Build plot request query string
+				const queryParams = 
+					"databaseversion=4.0" +
+				  	"&webserviceapi=4.0" + 
+					"&plottype="  + plotType +
+					"&monitorid=" + monitorId +
+					"&startdate=" + startDate +
+					"&enddate="   + endDate;
+
+				// Build full plot image request URL
+				const plotRequestURL = plotServicePath + plotServiceName + "?" + queryParams;
+				
+				// Build plot json request URL
+        		const jsonRequestURL = plotRequestURL + "&responsetype=json";
+        
+		        // Request the JSON response first to check for server-side errors
+		        fetch(jsonRequestURL, { mode: 'cors' })
+					.then(response => response.json())
+					.then(data => {
+						console.log(data);
+
+						if (data.status == "error") {
+					  		handleServerError(data.errors);
+					  		return null;
+					  	}
+					})
+					.catch(error => {
+						return null;
+					});
+				
+				return plotRequestURL;
+			}
+
+			/**
+			 * Handles server side errors by displaying them in an error message box. Some common errors are translated to more user-friendly text.
+			 * @param error  the error message string from the server
+			 */
+			function handleServerError(serverErrorString) {
+				// Define regex test patterns for common server-side errors
+				const nonexistantMonitorIDPattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in monitor_subset\(ws_monitor1, monitorIDs = monitorID\) : ↵  ws_monitor object contains zero monitors↵$/;
+				const multiYearDateRangePattern = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in PWFSLSmoke::monitor_load\(startdate = startdate, enddate = enddate,  : ↵  Requests covering multiple years are not supported↵$/;
+				const noReadingsInDateRangePattern1 = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: \$ operator is invalid for atomic vectors↵$/;
+				const noReadingsInDateRangePattern2 = /^Error : Error in createDataList\(infoList, DATA_DIR\) : ↵  Error loading data: Error in monitor_subset\(ws_monitor, tlim = c\(starttime, endtime\)\) : ↵  ws_monitor object contains zero monitors↵$/;
+
+				// Replace all line breaks in the server error string with a "↵" character
+				const stringifiedError = serverErrorString.replace(/(\r\n|\n|\r)/gm, "↵");
+
+				// Default error box message if the server error string doesn't match an existing test pattern
+				let errorBoxMessage = serverErrorString;
+
+				// Test if the server error string matches a pattern. If so, generate the corresponding error box message
+				if (nonexistantMonitorIDPattern.test(stringifiedError)) {
+					errorBoxMessage = "Could not find monitor with ID: '" + $("#monitorId").val() + "'.";
+				} else if (multiYearDateRangePattern.test(stringifiedError)) {
+					errorBoxMessage = "Date range cannot span multiple years.";
+				} else if (noReadingsInDateRangePattern1.test(stringifiedError) ||
+					noReadingsInDateRangePattern2.test(stringifiedError)) {
+					errorBoxMessage = "Monitor has no data readings in this date range.";
+				} 
+
+				// Display final message in the error message box
+				showErrorBox(errorBoxMessage);
+			}
+
+			// ----- Page interaction --------------------------------------------------------------------------
+
+			/**
+		   	 * Open the date input field as a DateRangerPicker widget and set its options.
+		   	 */
+			$("input[name=daterange]").daterangepicker({
+				startDate: moment().subtract(10, "day").startOf("day").toDate(),
+        		endDate: moment().startOf("day").toDate(),
+        		minDate: "01/01/1998",
+        		maxDate: moment().startOf("day").toDate(),
+				opens: "left"
+			}, function(start, end, label) {});
+
+			/**
+			 * Update the map on button click.
+			 */
+			$("#update-map-button").click(function() {
+				updateMap();
+			});
+
+			/**
+			 * Generate a "dailybarplot" plot on button click.
+			 */
+			$("#daily-average-plot-button").click(function() {	
+			 	generatePlot("dailybarplot");
+			});
+
+			/**
+			 * Generate a "dailybyhour" plot on button click.
+			 */
+			$("#time-of-day-plot-button").click(function() {
+			 	generatePlot("dailybyhour");
+			});
+
+			/**
+			 * Generate a "timeseries" plot on button click.
+			 */
+			$("#time-series-plot-button").click(function() {
+			 	generatePlot("timeseries");
+			});
+			
+			/** 
+			 * Show the error box with a message.
+			 * @param message  the message to display
+			 */
+			function showErrorBox(message) {
+			  	// Set error box text
+		    	$("#error-box-message").text(message);
+		    
+				$("#error-box").removeClass("invisible");
+				$("#error-box").addClass("visible");
+			}
+			
+			/**
+			 * Hide the error box.
+			 */
+			function hideErrorBox() {
+				$("#error-box").removeClass("visible");
+				$("#error-box").addClass("invisible");
+			}
+
+			/**
+			 * Hide the error box when its close button is clicked.
+			 */
+			$(".close").on("click", function () {
+        		hideErrorBox();
+    		});
+
+    		// ----- Script start ------------------------------------------------------------------------
+
+    		//const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/"; // Production
+		  	//const plotServicePath = "https://test.airfire.org/monitor-plot/test/"; // Test 
+		  	//const plotServicePath = "http://localhost:8080/monitor-plot/dev/"; // RStudio test
+		  	//const plotServicePath = "http://localhost:8080/monitor-plot/test/" // Local Docker test
+
+		  	// Service for plot products
+		  	const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
+		  	const plotServiceName = "plot";
+
+		  	// Service for monitor GeoJSON products
+		  	const dataServicePath = "https://tools.airfire.org/monitor-data/v4/";
+		  	const geoJsonServiceName = "geojson";
+
+		  	// Create the Leaflet map centered on the continental US
+			var monitorMap = L.map('leaflet-map', {
+				preferCanvas: true
+			}).setView([39.5, -98.35], 3);
+
+			// Create a canvas layer
+			var mapRenderer = L.canvas({ padding: 0.5 });
+
+			// Create a Stamen tile layer
+			var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
+				attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+				subdomains: 'abcd',
+				minZoom: 3,
+				maxZoom: 15,
+				ext: 'png'
+			})
+
+			// Create a layer group for all the monitor markers
+			var monitorMarkersLayerGroup = L.layerGroup();
+
+			// Add layers to the map
+			monitorMap.addLayer(tileLayer);
+			monitorMap.addLayer(monitorMarkersLayerGroup);
+
+			// Add monitor markers to the map for the initial date range
+			addMonitorMarkers(buildMonitorsGeoJsonRequestUrl());
+
+			// The currentlySelected monitor marker
+			var selectedMonitor = null;
+		});
+	</script>
+</body>
+</html>
