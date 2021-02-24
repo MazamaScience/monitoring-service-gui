@@ -346,71 +346,75 @@
 			}
 
 			/**
-			 * Instructions for each monitor marker.
+			 * Create an interactive marker for a monitor GeoJSON feature and add it to the map.
 			 * @param monitorFeature  a monitor's GeoJSON feature description
-			 * @param layer  ? TODO
+			 * @param layer  default marker layer provided for the monitorFeature (ignored)
 			 */
 			function createMonitorMarker(monitorFeature, layer) {
-			    if (monitorFeature.properties && monitorFeature.properties.monitorID) {
-			    	// Get monitor ID
-					const monitorId = monitorFeature.properties.monitorID;
-
-			    	// Get monitor coordinates
-			    	const coords = monitorFeature.geometry.coordinates;
-					const lon = coords[0];
-					const lat = coords[1];
-
-					// Create a circle marker for the monitor
-					var monitorMarker = L.circleMarker([lat, lon], {
-						renderer: mapRenderer,
-						radius: 8,
-						color: "#008800",
-						fillColor: "#66ff66",
-						fillOpacity: 0.6,
-						weight: 2
-					})
-
-					// Open a popup when the marker is clicked
-					//monitorMarker.bindPopup(monitorId);
-
-					// Open a popup when the marker is hovered over
-					monitorMarker.on('mouseover', function(e) {
-						var popup = 
-							L.popup({autoPan: false})
-							.setLatLng(e.latlng) 
-						   	.setContent(monitorId)
-						   	.openOn(monitorMap);
-					});
-
-					// React when the marker is clicked
-					monitorMarker.on('click', function(e) {
-						// Focus on and populate the monitor ID input field
-						$("#monitorId").focus();
-		        		$("#monitorId").val(monitorId);
-
-		        		// Un-highlight the previously selected monitor marker
-		        		if (selectedMonitor != null) {
-		        			selectedMonitor.setStyle({
-								color: "#008800",
-								fillColor: "#66ff66",
-								weight: 2,
-		        			});
-		        		} 
-
-		        		selectedMonitor = monitorMarker;
-
-		        		// Highlight the newly selected monitor
-		        		selectedMonitor.setStyle({
-		        			color: "#000000",
-		        			weight: 4
-		        		});
-
-		        		selectedMonitor.bringToFront();
-		       		});
-
-					// Add the marker to the map
-			        monitorMarker.addTo(monitorMap);
+				// Skip if the feature doesn't have a monitor ID
+			    if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) {
+			    	return;
 			    }
+
+		    	// Get monitor ID
+				const monitorId = monitorFeature.properties.monitorID;
+
+		    	// Get monitor coordinates
+		    	const coords = monitorFeature.geometry.coordinates;
+				const lon = coords[0];
+				const lat = coords[1];
+
+				// Create a circle marker for the monitor
+				var monitorMarker = L.circleMarker([lat, lon], {
+					renderer: mapRenderer,
+					radius: 8,
+					color: "#008800",
+					fillColor: "#66ff66",
+					fillOpacity: 0.6,
+					weight: 2
+				})
+
+				// Open a popup when the marker is clicked
+				//monitorMarker.bindPopup(monitorId);
+
+				// Open a popup when the marker is hovered over
+				monitorMarker.on('mouseover', function(e) {
+					var popup = 
+						L.popup({autoPan: false})
+						.setLatLng(e.latlng) 
+					   	.setContent(monitorId)
+					   	.openOn(monitorMap);
+				});
+
+				// React when the marker is clicked
+				monitorMarker.on('click', function(e) {
+					// Focus on and populate the monitor ID input field
+					$("#monitorId").focus();
+	        		$("#monitorId").val(monitorId);
+
+	        		// Un-highlight the previously selected monitor marker
+	        		if (selectedMonitor != null) {
+	        			selectedMonitor.setStyle({
+							color: "#008800",
+							fillColor: "#66ff66",
+							weight: 2,
+	        			});
+	        		} 
+
+	        		selectedMonitor = monitorMarker;
+
+	        		// Highlight the newly selected monitor
+	        		selectedMonitor.setStyle({
+	        			color: "#000000",
+	        			weight: 4
+	        		});
+
+	        		selectedMonitor.bringToFront();
+	       		});
+
+				// Add the marker to the map
+		        //monitorMarker.addTo(monitorMap);
+		        monitorMarker.addTo(monitorMarkersLayerGroup);
 			}
 
 			/**
@@ -520,13 +524,8 @@
 			 * Update the map's monitor markers on button click.
 			 */
 			$("#update-map-button").click(function() {
-				// Clear the monitor map of all layers
-				monitorMap.eachLayer((layer) => {
-					layer.remove();
-				});
-
-				// Add the Stamen tile layer back to the map
-				monitorMap.addLayer(tileLayer);
+				// Remove all the markers from the map
+				monitorMarkersLayerGroup.clearLayers();
 
 				// Add monitor markers to the map for the input date range
 				const monitorsGeoJsonRequestUrl = buildMonitorsGeoJsonRequestUrl();
@@ -605,7 +604,7 @@
 			// Create a canvas layer
 			var mapRenderer = L.canvas({ padding: 0.5 });
 
-			// Create a Stamen tile layer and add it to the map
+			// Create a Stamen tile layer
 			var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
 				attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 				subdomains: 'abcd',
@@ -614,11 +613,17 @@
 				ext: 'png'
 			})
 
+			// Create a layer group for all the monitor markers
+			var monitorMarkersLayerGroup = L.layerGroup();
+
+			// Add layers to the map
 			monitorMap.addLayer(tileLayer);
+			monitorMap.addLayer(monitorMarkersLayerGroup);
 
 			// Add monitor markers to the map for the initial date range
 			addMonitorMarkers(buildMonitorsGeoJsonRequestUrl());
 
+			// The currentlySelected monitor marker
 			var selectedMonitor = null;
 		});
 	</script>
