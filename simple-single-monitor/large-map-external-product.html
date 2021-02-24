@@ -329,6 +329,8 @@
 			 * Fetch and load the monitors GeoJSON file from AirFire. Then display them on the map as markers.
 			 */
 			function addMonitorMarkers(monitorsGeoJsonRequestURL) {
+				console.log(monitorsGeoJsonRequestURL);
+
 		        fetch(monitorsGeoJsonRequestURL, { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
@@ -523,14 +525,8 @@
 					layer.remove();
 				});
 
-				// Create a Stamen tile layer and add it to the map
-				var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
-					attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-					subdomains: 'abcd',
-					minZoom: 3,
-					maxZoom: 15,
-					ext: 'png'
-				}).addTo(monitorMap);
+				// Add the Stamen tile layer back to the map
+				monitorMap.addLayer(tileLayer);
 
 				// Add monitor markers to the map for the input date range
 				const monitorsGeoJsonRequestUrl = buildMonitorsGeoJsonRequestUrl();
@@ -616,7 +612,9 @@
 				minZoom: 3,
 				maxZoom: 15,
 				ext: 'png'
-			}).addTo(monitorMap);
+			})
+
+			monitorMap.addLayer(tileLayer);
 
 			// Add monitor markers to the map for the initial date range
 			addMonitorMarkers(buildMonitorsGeoJsonRequestUrl());
