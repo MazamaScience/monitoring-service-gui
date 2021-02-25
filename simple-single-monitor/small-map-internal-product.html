@@ -343,11 +343,11 @@
 				// Create a circle marker for the monitor
 				var monitorMarker = L.circleMarker([lat, lon], {
 					renderer: mapRenderer,
-					radius: 8,
-					color: "#008800",
-					fillColor: "#66ff66",
-					fillOpacity: 0.6,
-					weight: 2
+					radius: 7,
+					color: "#444444",
+					fillColor: "#777777",
+					fillOpacity: 0.9,
+					weight: 1.7
 				})
 
 				// Open a popup when the marker is clicked
@@ -371,9 +371,9 @@
 	        		// Un-highlight the previously selected monitor marker
 	        		if (selectedMonitor != null) {
 	        			selectedMonitor.setStyle({
-							color: "#008800",
-							fillColor: "#66ff66",
-							weight: 2,
+							color: "#444444",
+							fillColor: "#777777",
+							weight: 1.7,
 	        			});
 	        		} 
 
