@@ -219,23 +219,24 @@
 	  			</div>
 
   				<!-- Plot type input -->
-  				<div id="plot-type-buttons">
-  					<label>3) Select product</label>
+	  			<div id="plot-type-list" class="form-group">
+	  				<label>3) Select product</label>
 
-  					<div class="d-flex flex-row">
-  						<button id="daily-average-plot-button" class="btn btn-primary mr-1" type="button">
-							Daily average
-						</button>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="plot-type" value="dailybarplot" checked>
+						<label class="form-check-label">Daily average</label>
+					</div>
 
-						<button id="time-of-day-plot-button" class="btn btn-primary mr-1" type="button">
-							Time of day
-						</button>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="plot-type" value="dailybyhour">
+						<label class="form-check-label">Time of day</label>
+					</div>
 
-						<button id="time-series-plot-button" class="btn btn-primary" type="button">
-							Time series
-						</button>
-  					</div>
-  				</div>			
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="plot-type" value="timeseries">
+						<label class="form-check-label">Time series</label>
+					</div>
+	  			</div>			
   			</div>
   		</div>
 
@@ -267,7 +268,6 @@
 			 * Loads and displays markers for monitors present in the current date range.
 			 */
 			function updateMap() {
-
 				// Remove all the markers from the map
 				monitorMarkersLayerGroup.clearLayers();
 
@@ -407,10 +407,10 @@
 			 * Builds a plot request and sets the plot image to the resulting URL.
 			 * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
 			 */
-			function generatePlot(plotType) {
+			function generatePlot() {
 				hideErrorBox();
 
-				const plotRequestURL = buildPlotRequestURL(plotType);
+				const plotRequestURL = buildPlotRequestURL();
 			  
 				console.log("Plot request URL: " + plotRequestURL);
 			  
@@ -432,10 +432,11 @@
 	         * Builds a URL request to the plot service API using form input.
 	         * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
 	         */
-			function buildPlotRequestURL(plotType) {
+			function buildPlotRequestURL() {
 				// Get form input
 				const monitorId = $("#monitorId").val();
 				const dateRange = $("input[name=daterange]").val().split(" - ");
+				const plotType  = $("input[name=plot-type]:checked").val();
 
 				// Convert format of input date range
 				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
@@ -519,31 +520,17 @@
 			}, function(start, end, label) {});
 
 			/**
+       		 * React when a plot type is selected.
+       		 */
+			$("input[type=radio][name=plot-type]").change(function() {
+			  	generatePlot();
+			});
+
+			/**
 			 * Update the map on button click.
 			 */
 			$("#update-map-button").click(function() {
 				updateMap();
-			});
-
-			/**
-			 * Generate a "dailybarplot" plot on button click.
-			 */
-			$("#daily-average-plot-button").click(function() {	
-			 	generatePlot("dailybarplot");
-			});
-
-			/**
-			 * Generate a "dailybyhour" plot on button click.
-			 */
-			$("#time-of-day-plot-button").click(function() {
-			 	generatePlot("dailybyhour");
-			});
-
-			/**
-			 * Generate a "timeseries" plot on button click.
-			 */
-			$("#time-series-plot-button").click(function() {
-			 	generatePlot("timeseries");
 			});
 
 			/**
