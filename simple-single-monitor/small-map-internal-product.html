@@ -40,10 +40,6 @@
 			margin-bottom: 16px;
 		}
 
-		input {
-			margin-bottom: 5px;
-		}
-
 		#toolbar {
 			width: 500px;
 			min-width: 500px;
@@ -62,28 +58,10 @@
 			margin-bottom: 25px;
 			display: flex;
 			flex-direction: column;
-			align-items: center;
 		}
 
 		#update-map-button {
 			font-size: 12px;
-		}
-
-		#action-buttons-section {
-			width: 100%;
-			display: flex;
-			flex-direction: row;
-			justify-content: space-around;
-		}
-
-		#action-buttons-section button {
-			width: 90px;
-		}
-
-		#query-inputs-section {
-			display: flex;
-			flex-direction: column;
-			width: 100%;
 		}
 
 		label {
@@ -101,6 +79,15 @@
 			justify-content: space-between;
 		}
 
+		#map-date-range {
+			font-size: 12px;
+		}
+
+		#leaflet-map {
+			width: 100%;
+			height: 100%;
+		}
+
 		#content-area {
 			padding: 40px;
 			flex-grow: 1;
@@ -111,29 +98,6 @@
 		#plot-image {
 			max-height: 100%;
 			box-shadow: 0px 0px 10px gray;
-		}
-
-		#loading-spinner {
-			position: absolute;
-			left: 50%;
-			top: 50%;
-			width: 100px;
-			height: 100px;
-			transform-origin: 0% 0%;
-			border: 12px solid WhiteSmoke;
-			border-top: 12px solid #007bff;
-			border-radius: 50%;
-			animation: spin 0.45s linear infinite;
-			-webkit-animation: spin 0.45s linear infinite; /* Safari */
-		}
-
-		#map-date-range {
-			font-size: 12px;
-		}
-
-		#leaflet-map {
-			width: 100%;
-			height: 100%;
 		}
 		
 		#error-box {
@@ -160,6 +124,20 @@
 		#error-box p {
 		  margin: 0px;
 		  font-family: monospace;
+		}
+
+		#loading-spinner {
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			width: 100px;
+			height: 100px;
+			transform-origin: 0% 0%;
+			border: 12px solid WhiteSmoke;
+			border-top: 12px solid #007bff;
+			border-radius: 50%;
+			animation: spin 0.45s linear infinite;
+			-webkit-animation: spin 0.45s linear infinite; /* Safari */
 		}
 
 		.visible {
@@ -195,48 +173,46 @@
 		</div>
 
 		<!-- Inputs -->
-  		<div id="inputs-section" class="">
-  			<div id="query-inputs-section">
-  				<!-- Text inputs -->
-	  			<div id="text-inputs">
-	  				<!-- Time range input -->
-	  				<div class="mb-3">
-	  					<div class="form-group text-input mb-0">
-			  				<label>1) Select date range</label>
-			  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
-		  				</div>
-
-		  				<button id="update-map-button" class="btn btn-primary" type="button">
-							Update map
-						</button>
+  		<div id="inputs-section">
+			<!-- Text inputs -->
+  			<div id="text-inputs">
+  				<!-- Time range input -->
+  				<div class="mb-3">
+  					<div class="form-group text-input mb-1">
+		  				<label>1) Select date range</label>
+		  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
 	  				</div>
-		  			
-	  				<!-- Monitor ID input -->
-		  			<div class="form-group text-input">
-		  				<label>2) Select monitor on map</label>
-		  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId" disabled>
-		  			</div>
+
+	  				<button id="update-map-button" class="btn btn-primary" type="button">
+						Update map
+					</button>
+  				</div>
+	  			
+  				<!-- Monitor ID input -->
+	  			<div class="form-group text-input">
+	  				<label>2) Select monitor on map</label>
+	  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId" disabled>
 	  			</div>
+  			</div>
 
-  				<!-- Plot type input -->
-	  			<div id="plot-type-list" class="form-group">
-	  				<label>3) Select product</label>
+			<!-- Plot type input -->
+  			<div id="plot-type-list" class="form-group">
+  				<label>3) Select product</label>
 
-					<div class="form-check">
-						<input class="form-check-input" type="radio" name="plot-type" value="dailybarplot" checked>
-						<label class="form-check-label">Daily average</label>
-					</div>
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="plot-type" value="dailybarplot" checked>
+					<label class="form-check-label">Daily average</label>
+				</div>
 
-					<div class="form-check">
-						<input class="form-check-input" type="radio" name="plot-type" value="dailybyhour">
-						<label class="form-check-label">Time of day</label>
-					</div>
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="plot-type" value="dailybyhour">
+					<label class="form-check-label">Time of day</label>
+				</div>
 
-					<div class="form-check">
-						<input class="form-check-input" type="radio" name="plot-type" value="timeseries">
-						<label class="form-check-label">Time series</label>
-					</div>
-	  			</div>			
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="plot-type" value="timeseries">
+					<label class="form-check-label">Time series</label>
+				</div>
   			</div>
   		</div>
 
