@@ -331,8 +331,9 @@
 			    	return;
 			    }
 
-		    	// Get monitor ID
+		    	// Get monitor ID and site name
 				const monitorId = monitorFeature.properties.monitorID;
+				const siteName = monitorFeature.properties.siteName;
 
 		    	// Get monitor coordinates
 		    	const coords = monitorFeature.geometry.coordinates;
@@ -357,7 +358,7 @@
 					var popup = 
 						L.popup({autoPan: false})
 						.setLatLng(e.latlng) 
-					   	.setContent(monitorId)
+					   	.setContent("<b>" + siteName + "</b><br>" + monitorId)
 					   	.openOn(monitorMap);
 				});
 
