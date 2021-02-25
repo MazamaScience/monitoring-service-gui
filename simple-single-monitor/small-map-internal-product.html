@@ -41,8 +41,8 @@
 		}
 
 		#toolbar {
-			width: 500px;
-			min-width: 500px;
+			width: 450px;
+			min-width: 450px;
 			height: 100vh;
 			padding: 0px 20px;
 			display: flex;
@@ -58,6 +58,10 @@
 			margin-bottom: 25px;
 			display: flex;
 			flex-direction: column;
+		}
+
+		#daterange, #monitorId {
+			width: 220px;
 		}
 
 		#update-map-button {
@@ -148,10 +152,6 @@
 			display: none;
 		}
 
-		#daterange {
-			width: 210px;
-		}
-
 		@keyframes spin {
 			0% { transform: rotate(0deg) translate(-50%, -50%); }
 			100% { transform: rotate(360deg) translate(-50%, -50%); }
@@ -177,23 +177,25 @@
 			<!-- Text inputs -->
   			<div id="text-inputs">
   				<!-- Time range input -->
-  				<div class="mb-3">
-  					<div class="form-group text-input mb-1">
+  				<div class="d-flex align-items-end mb-3">
+  					<div class="form-group text-input mr-2 mb-0">
 		  				<label>1) Select date range</label>
 		  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
 	  				</div>
 
-	  				<button id="update-map-button" class="btn btn-primary" type="button">
+	  				<button id="update-map-button" class="btn btn-secondary" type="button">
 						Update map
 					</button>
   				</div>
 	  			
-  				<!-- Monitor ID input -->
+  				
+  			</div>
+
+  			<!-- Monitor ID input -->
 	  			<div class="form-group text-input">
 	  				<label>2) Select monitor on map</label>
 	  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId" disabled>
 	  			</div>
-  			</div>
 
 			<!-- Plot type input -->
   			<div id="plot-type-list" class="form-group">
