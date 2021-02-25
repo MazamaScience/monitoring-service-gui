@@ -133,6 +133,10 @@
 			-webkit-animation: spin 0.45s linear infinite; /* Safari */
 		}
 
+		#map-date-range {
+			font-size: 12px;
+		}
+
 		#leaflet-map {
 			width: 100%;
 			height: 100%;
@@ -241,6 +245,8 @@
   			</div>
   		</div>
 
+  		<p id="map-date-range" class="mb-1">Hi</p>
+
   		<div id="leaflet-map" class="mb-3"></div>
 	</div>
 
@@ -264,10 +270,12 @@
 
 	<script type="text/javascript">
 		$(function() {
+    		// ----- Functions --------------------------------------
 			/**
 			 * Loads and displays markers for monitors present in the current date range.
 			 */
 			function updateMap() {
+
 				// Remove all the markers from the map
 				monitorMarkersLayerGroup.clearLayers();
 
@@ -278,6 +286,11 @@
 
 				// Add monitor markers to the map
 				addMonitorMarkers(monitorsGeoJsonRequestUrl);
+
+				// Update the date range label for the map
+				const dateRange = $("input[name=daterange]").val();
+				$("#map-date-range").text("Monitors for " + dateRange);
+
 			}
 
 			/**
@@ -497,7 +510,7 @@
 
 			// ----- Page interaction --------------------------------------------------------------------------
 
-			/**
+						/**
 		   	 * Open the date input field as a DateRangerPicker widget and set its options.
 		   	 */
 			$("input[name=daterange]").daterangepicker({
@@ -620,7 +633,8 @@
 			monitorMap.addLayer(monitorMarkersLayerGroup);
 
 			// Add monitor markers to the map for the initial date range
-			addMonitorMarkers(buildMonitorsGeoJsonRequestUrl());
+			//addMonitorMarkers(buildMonitorsGeoJsonRequestUrl());
+			updateMap();
 
 			// The currentlySelected monitor marker
 			var selectedMonitor = null;
