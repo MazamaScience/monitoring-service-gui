@@ -172,6 +172,10 @@
 			display: none;
 		}
 
+		#daterange {
+			width: 210px;
+		}
+
 		/* Small devices (landscape phones, less than 768px) */
 		@media (max-width: 769px) {
 			body {
@@ -189,9 +193,7 @@
 				margin-bottom: 0px;
 			}
 
-			#daterange {
-				width: 210px;
-			}
+			
 
 			#query-inputs-section {
 				margin: auto;
@@ -240,7 +242,7 @@
 			  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
 		  				</div>
 
-		  				<button id="update-map-button" class="btn btn-info" type="button">
+		  				<button id="update-map-button" class="btn btn-primary" type="button">
 							Update map
 						</button>
 	  				</div>
@@ -257,15 +259,15 @@
   					<label>Plot type</label>
 
   					<div class="d-flex flex-row">
-  						<button id="daily-average-plot-button" class="btn btn-success mr-1" type="button">
+  						<button id="daily-average-plot-button" class="btn btn-primary mr-1" type="button">
 							Daily average
 						</button>
 
-						<button id="time-of-day-plot-button" class="btn btn-success mr-1" type="button">
+						<button id="time-of-day-plot-button" class="btn btn-primary mr-1" type="button">
 							Time of day
 						</button>
 
-						<button id="time-series-plot-button" class="btn btn-success" type="button">
+						<button id="time-series-plot-button" class="btn btn-primary" type="button">
 							Time series
 						</button>
   					</div>
