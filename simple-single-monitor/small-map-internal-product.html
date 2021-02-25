@@ -102,16 +102,10 @@
 		}
 
 		#content-area {
+			padding: 40px;
 			flex-grow: 1;
 			position: relative;
 			z-index: 1;
-		}
-
-		#plot-container {
-			height: 100%;
-			margin: auto;
-			padding: 40px;
-			position: relative;
 		}
 
 		#plot-image {
@@ -251,21 +245,19 @@
 	</div>
 
 	<div id="content-area">
-		<div id="plot-container">
-			<img id="plot-image" src="" class="invisible">
+		<img id="plot-image" src="" class="invisible">
 
-			<div id="error-box" class="alert alert-danger alert-dismissible invisible">
-				<h1>ERROR</h1>
+		<div id="error-box" class="alert alert-danger alert-dismissible invisible">
+			<h1>ERROR</h1>
 
-				<p id="error-box-message"></p>
+			<p id="error-box-message"></p>
 
-				<button type="button" class="close" aria-label="Close">
-    				<span aria-hidden="true">&times;</span>
-  				</button>
-			</div>
-
-			<div id="loading-spinner" class="invisible"></div>
+			<button type="button" class="close" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+				</button>
 		</div>
+
+		<div id="loading-spinner" class="invisible"></div>
 	</div>
 
 	<script type="text/javascript">
