@@ -363,9 +363,6 @@
 					weight: 1.7
 				})
 
-				// Open a popup when the marker is clicked
-				//monitorMarker.bindPopup(monitorId);
-
 				// Open a popup when the marker is hovered over
 				monitorMarker.on('mouseover', function(e) {
 					var popup = 
@@ -373,6 +370,11 @@
 						.setLatLng(e.latlng) 
 					   	.setContent("<b>" + siteName + "</b><br>" + monitorId)
 					   	.openOn(monitorMap);
+				});
+
+				// Close the popup when the marker is not hovered over
+				monitorMarker.on('mouseout', function(e) {
+					monitorMap.closePopup();
 				});
 
 				// React when the marker is clicked
@@ -401,8 +403,7 @@
 	        		selectedMonitor.bringToFront();
 	       		});
 
-				// Add the marker to the map
-		        //monitorMarker.addTo(monitorMap);
+				// Add the marker to the markers layer
 		        monitorMarker.addTo(monitorMarkersLayerGroup);
 			}
 
