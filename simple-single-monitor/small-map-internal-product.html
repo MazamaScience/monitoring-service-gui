@@ -254,7 +254,7 @@
 
 			<button type="button" class="close" aria-label="Close">
 				<span aria-hidden="true">&times;</span>
-				</button>
+			</button>
 		</div>
 
 		<div id="loading-spinner" class="invisible"></div>
@@ -282,7 +282,6 @@
 				// Update the date range label for the map
 				const dateRange = $("input[name=daterange]").val();
 				$("#map-date-range").text("Monitors for " + dateRange);
-
 			}
 
 			/**
@@ -314,6 +313,11 @@
 		        fetch(monitorsGeoJsonRequestUrl, { mode: 'cors' })
 					.then(response => response.json())
 					.then(data => {
+						if (data.status == "error") {
+					  		handleServerError(data.errors);
+					  		return null;
+					  	}
+
 						// Create and add a marker for each monitor feature
 						L.geoJSON(data, {
 						    onEachFeature: createMonitorMarker
