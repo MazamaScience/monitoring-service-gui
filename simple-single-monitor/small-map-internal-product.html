@@ -205,17 +205,17 @@
   				<label>3) Select product</label>
 
 				<div class="form-check">
-					<input class="form-check-input" type="radio" name="plot-type" value="dailybarplot">
+					<input id="dailybarplot-button" class="form-check-input" type="radio" name="plot-type" value="dailybarplot" disabled>
 					<label class="form-check-label">Daily average</label>
 				</div>
 
 				<div class="form-check">
-					<input class="form-check-input" type="radio" name="plot-type" value="dailybyhour">
+					<input id="dailybyhour-button" class="form-check-input" type="radio" name="plot-type" value="dailybyhour" disabled>
 					<label class="form-check-label">Time of day</label>
 				</div>
 
 				<div class="form-check">
-					<input class="form-check-input" type="radio" name="plot-type" value="timeseries">
+					<input id="timeseries-button" class="form-check-input" type="radio" name="plot-type" value="timeseries" disabled>
 					<label class="form-check-label">Time series</label>
 				</div>
   			</div>
@@ -274,8 +274,7 @@
 				// Update the map date range label
 				$("#map-date-range").text("Monitors with data " + startDate + " to " + endDate);
 
-				// Clear the selected monitor input box
-				$("#monitorId").val("");
+				clearMonitorId();
 			}
 
 			/**
@@ -395,6 +394,11 @@
 	        		});
 
 	        		selectedMonitor.bringToFront();
+
+	        		// Enable the product type selectors
+					$("#dailybarplot-button").prop("disabled", false);
+					$("#dailybyhour-button").prop("disabled", false);
+					$("#timeseries-button").prop("disabled", false);
 	       		});
 
 				// Add the marker to the markers layer
@@ -403,7 +407,6 @@
 
 			/**
 			 * Builds a plot request and sets the plot image to the resulting URL.
-			 * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
 			 */
 			function generatePlot() {
 				hideErrorBox();
@@ -420,7 +423,7 @@
 					$("#plot-image").removeClass("visible");
 					$("#plot-image").addClass("invisible");
 
-					// Show loading spinner
+					// Show plot placeholder
 					$("#plot-placeholder").removeClass("invisible");
 					$("#plot-placeholder").addClass("visible");
 
@@ -432,7 +435,6 @@
 
 			/**
 	         * Builds a URL request to the plot service API using form input.
-	         * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
 	         */
 			function buildPlotRequestURL() {
 				// Get form input
@@ -508,9 +510,9 @@
 				showErrorBox(errorBoxMessage);
 			}
 
-			// ----- Page interaction --------------------------------------------------------------------------
+			// ----- Page element behavior --------------------------------------------------------------------------
 
-						/**
+			/**
 		   	 * Open the date input field as a DateRangerPicker widget and set its options.
 		   	 */
 			$("input[name=daterange]").daterangepicker({
@@ -543,7 +545,7 @@
 				$("#loading-spinner").removeClass("visible");
 				$("#loading-spinner").addClass("invisible");
 
-				// Hide plot image
+				// Hide plot placeholder
 				$("#plot-placeholder").removeClass("visible");
 				$("#plot-placeholder").addClass("invisible");
 
@@ -567,6 +569,19 @@
 				$("#loading-spinner").removeClass("visible");
 				$("#loading-spinner").addClass("invisible");
 			}
+
+			/**
+			 * Clears the monitor ID input box and disables the product type selectors.
+			 */
+			function clearMonitorId() {
+				// Clear the the monitor input box
+				$("#monitorId").val("");
+
+				// Disable the product type selectors
+				$("#dailybarplot-button").prop("disabled", true);
+				$("#dailybyhour-button").prop("disabled", true);
+				$("#timeseries-button").prop("disabled", true);
+			}
 			
 			/**
 			 * Hide the error box.
@@ -584,11 +599,6 @@
     		});
 
     		// ----- Script start ------------------------------------------------------------------------
-
-    		//const plotServicePath = "https://tools.airfire.org/monitor-plot/v4/"; // Production
-		  	//const plotServicePath = "https://test.airfire.org/monitor-plot/test/"; // Test 
-		  	//const plotServicePath = "http://localhost:8080/monitor-plot/dev/"; // RStudio test
-		  	//const plotServicePath = "http://localhost:8080/monitor-plot/test/" // Local Docker test
 
 		  	// Service for plot products
 		  	const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
@@ -623,10 +633,9 @@
 			monitorMap.addLayer(monitorMarkersLayerGroup);
 
 			// Add monitor markers to the map for the initial date range
-			//addMonitorMarkers(buildMonitorsGeoJsonRequestUrl());
 			updateMap();
 
-			// The currentlySelected monitor marker
+			// The currently selected monitor marker
 			var selectedMonitor = null;
 		});
 	</script>
