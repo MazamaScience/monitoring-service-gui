@@ -23,6 +23,7 @@
 	
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+	<script src="leaflet-svg-shape-markers/dist/leaflet-svg-shape-markers.min.js"></script>
 
 	<style type="text/css">
 		body {
@@ -235,6 +236,9 @@
 		<div id="loading-spinner" class="invisible"></div>
 	</div>
 
+	
+
+
 	<script type="text/javascript">
 		$(function() {
     		// ----- Functions --------------------------------------
@@ -297,6 +301,8 @@
 					  		return null;
 					  	}
 
+					  	console.log(data);
+
 						// Create and add a marker for each monitor feature
 						L.geoJSON(data, {
 						    onEachFeature: createMonitorMarker
@@ -322,6 +328,7 @@
 		    	// Get monitor ID and site name
 				const monitorId = monitorFeature.properties.monitorID;
 				const siteName = monitorFeature.properties.siteName;
+				const dataSource = monitorFeature.properties.dataSource;
 
 		    	// Get monitor coordinates
 		    	const coords = monitorFeature.geometry.coordinates;
@@ -329,14 +336,30 @@
 				const lat = coords[1];
 
 				// Create a circle marker for the monitor
+				/*
 				var monitorMarker = L.circleMarker([lat, lon], {
-					renderer: mapRenderer,
+					//renderer: mapRenderer,
 					radius: 7,
 					color: "#0048cc",
 					fillColor: "#007bff",
 					fillOpacity: 0.7,
 					weight: 1.7
 				})
+				*/
+				const shape = (dataSource == "AIRNOW") ? "circle" : "triangle";
+
+				if (shape == "triangle") {
+					console.log(dataSource);
+				}
+
+				var monitorMarker = L.shapeMarker([lat, lon], {
+					shape: shape,
+					radius: 6,
+					color: "#0037aa",
+					fillColor: "#007bff",
+					fillOpacity: 0.8,
+					weight: 1.6
+				});
 
 				// Open a popup when the marker is hovered over
 				monitorMarker.on('mouseover', function(e) {
@@ -361,9 +384,9 @@
 	        		// Un-highlight the previously selected monitor marker
 	        		if (selectedMonitor != null) {
 	        			selectedMonitor.setStyle({
-							color: "#0048cc",
+							color: "#0037aa",
 							fillColor: "#007bff",
-							weight: 1.7,
+							weight: 1.6,
 	        			});
 	        		} 
 
@@ -573,7 +596,7 @@
 
 		  	// Create the Leaflet map centered on the continental US
 			var monitorMap = L.map('leaflet-map', {
-				preferCanvas: true
+				preferCanvas: false
 			}).setView([39.5, -98.35], 3);
 
 			// Create a canvas layer
