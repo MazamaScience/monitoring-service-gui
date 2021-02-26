@@ -92,8 +92,14 @@
 		#content-area {
 			padding: 40px;
 			flex-grow: 1;
-			position: relative;
 			z-index: 1;
+		}
+
+		#plot-placeholder {
+			width: 700px;
+			height: 700px;
+			position: relative;
+			border: 10px dashed LightGray;
 		}
 
 		#plot-image {
@@ -221,6 +227,10 @@
 	</div>
 
 	<div id="content-area">
+		<div id="plot-placeholder">
+			<div id="loading-spinner" class="invisible"></div>
+		</div>
+
 		<img id="plot-image" src="" class="invisible">
 
 		<div id="error-box" class="alert alert-danger alert-dismissible invisible">
@@ -233,11 +243,8 @@
 			</button>
 		</div>
 
-		<div id="loading-spinner" class="invisible"></div>
+		
 	</div>
-
-	
-
 
 	<script type="text/javascript">
 		$(function() {
@@ -329,29 +336,14 @@
 				const monitorId = monitorFeature.properties.monitorID;
 				const siteName = monitorFeature.properties.siteName;
 				const dataSource = monitorFeature.properties.dataSource;
+				const shape = (dataSource == "AIRNOW") ? "circle" : "triangle";
 
 		    	// Get monitor coordinates
 		    	const coords = monitorFeature.geometry.coordinates;
 				const lon = coords[0];
 				const lat = coords[1];
 
-				// Create a circle marker for the monitor
-				/*
-				var monitorMarker = L.circleMarker([lat, lon], {
-					//renderer: mapRenderer,
-					radius: 7,
-					color: "#0048cc",
-					fillColor: "#007bff",
-					fillOpacity: 0.7,
-					weight: 1.7
-				})
-				*/
-				const shape = (dataSource == "AIRNOW") ? "circle" : "triangle";
-
-				if (shape == "triangle") {
-					console.log(dataSource);
-				}
-
+				// Create a marker for the monitor
 				var monitorMarker = L.shapeMarker([lat, lon], {
 					shape: shape,
 					radius: 6,
@@ -423,6 +415,10 @@
 					// Hide plot image
 					$("#plot-image").removeClass("visible");
 					$("#plot-image").addClass("invisible");
+
+					// Show loading spinner
+					$("#plot-placeholder").removeClass("invisible");
+					$("#plot-placeholder").addClass("visible");
 
 					// Show loading spinner
 					$("#loading-spinner").removeClass("invisible");
@@ -542,6 +538,10 @@
 				// Hide loading spinner
 				$("#loading-spinner").removeClass("visible");
 				$("#loading-spinner").addClass("invisible");
+
+				// Hide plot image
+				$("#plot-placeholder").removeClass("visible");
+				$("#plot-placeholder").addClass("invisible");
 
 				// Show plot image
 				$("#plot-image").removeClass("invisible");
