@@ -109,7 +109,7 @@
 		
 		#error-box {
 			min-width: 250px;
-			max-width: 800px;
+			max-width: 500px;
 			padding: 15px;
 			position: absolute;
 			top: 2%;
@@ -271,7 +271,11 @@
 				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYY-MM-DD'); 
 				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYY-MM-DD');
 
+				// Update the map date range label
 				$("#map-date-range").text("Monitors with data " + startDate + " to " + endDate);
+
+				// Clear the selected monitor input box
+				$("#monitorId").val("");
 			}
 
 			/**
