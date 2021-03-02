@@ -270,6 +270,14 @@
 
 				// Update the map date range label
 				$("#map-date-range").text("Monitors with data " + startDate + " to " + endDate);
+				
+				// Hide plot image
+				$("#plot-image").removeClass("visible");
+				$("#plot-image").addClass("invisible");
+
+				// Show plot placeholder
+				$("#plot-placeholder").removeClass("invisible");
+				$("#plot-placeholder").addClass("visible");
 
 				clearMonitorId();
 			}
