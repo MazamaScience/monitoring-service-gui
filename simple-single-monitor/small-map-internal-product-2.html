@@ -205,15 +205,15 @@
 				<label>3) Select product</label>
 
 				<div class="d-flex flex-row">
-					<button id="daily-average-plot-button" class="btn btn-primary mr-1" type="button">
+					<button id="dailybarplot-button" class="btn btn-primary mr-1" type="button">
 						Daily average
 					</button>
 
-					<button id="time-of-day-plot-button" class="btn btn-primary mr-1" type="button">
+					<button id="dailybyhour-button" class="btn btn-primary mr-1" type="button">
 						Time of day
 					</button>
 
-					<button id="time-series-plot-button" class="btn btn-primary" type="button">
+					<button id="timeseries-button" class="btn btn-primary" type="button">
 						Time series
 					</button>
 				</div>
@@ -270,7 +270,7 @@
 
 				// Update the map date range label
 				$("#map-date-range").text("Monitors with data " + startDate + " to " + endDate);
-				
+
 				// Hide plot image
 				$("#plot-image").removeClass("visible");
 				$("#plot-image").addClass("invisible");
@@ -539,21 +539,21 @@
 			/**
 			 * Generate a "dailybarplot" plot on button click.
 			 */
-			$("#daily-average-plot-button").click(function() {	
+			$("#dailybarplot-button").click(function() {	
 			 	generatePlot("dailybarplot");
 			});
 
 			/**
 			 * Generate a "dailybyhour" plot on button click.
 			 */
-			$("#time-of-day-plot-button").click(function() {
+			$("#dailybyhour-button").click(function() {
 			 	generatePlot("dailybyhour");
 			});
 
 			/**
 			 * Generate a "timeseries" plot on button click.
 			 */
-			$("#time-series-plot-button").click(function() {
+			$("#timeseries-button").click(function() {
 			 	generatePlot("timeseries");
 			});
 
