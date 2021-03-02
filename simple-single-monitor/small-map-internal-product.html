@@ -111,7 +111,7 @@
 			min-width: 250px;
 			max-width: 500px;
 			padding: 15px;
-			position: absolute;
+			
 			top: 2%;
   			left: 50%;
   			transform: translate(-50%, 0%);
@@ -229,21 +229,19 @@
 	<div id="content-area">
 		<div id="plot-placeholder">
 			<div id="loading-spinner" class="invisible"></div>
+
+			<div id="error-box" class="alert alert-danger alert-dismissible invisible">
+				<h1>ERROR</h1>
+
+				<p id="error-box-message"></p>
+
+				<button type="button" class="close" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
 		</div>
 
 		<img id="plot-image" src="" class="invisible">
-
-		<div id="error-box" class="alert alert-danger alert-dismissible invisible">
-			<h1>ERROR</h1>
-
-			<p id="error-box-message"></p>
-
-			<button type="button" class="close" aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-			</button>
-		</div>
-
-		
 	</div>
 
 	<script type="text/javascript">
