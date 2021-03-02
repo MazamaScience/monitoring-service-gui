@@ -311,8 +311,6 @@
 					  		return null;
 					  	}
 
-					  	console.log(data);
-
 						// Create and add a marker for each monitor feature
 						L.geoJSON(data, {
 						    onEachFeature: createMonitorMarker
@@ -339,7 +337,9 @@
 				const monitorId = monitorFeature.properties.monitorID;
 				const siteName = monitorFeature.properties.siteName;
 				const dataSource = monitorFeature.properties.dataSource;
-				const shape = (dataSource == "AIRNOW") ? "circle" : "triangle";
+				const shape = (dataSource.includes("AIRNOW") || dataSource.includes("EPA"))
+					? "circle"
+					: "triangle";
 
 		    	// Get monitor coordinates
 		    	const coords = monitorFeature.geometry.coordinates;
