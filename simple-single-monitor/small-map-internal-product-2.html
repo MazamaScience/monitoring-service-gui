@@ -61,19 +61,13 @@
 			flex-direction: column;
 		}
 
-		#daterange, #monitorId {
-			width: 220px;
-		}
-
 		label {
 			font-weight: bold;
 			margin-bottom: 2px;
 		}
 
-		#text-inputs {
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
+		#daterange, #monitorId {
+			width: 220px;
 		}
 
 		.btn-selected {
@@ -179,38 +173,38 @@
 </head>
 
 <body>
+	<!-- Left-hand sidebar area of the page -->
 	<div id="toolbar" class="pb-1">
 		<!-- page title -->
 		<div>
 			<h1>Single-Monitor Plots</h1>
 		</div>
 
-		<!-- Inputs -->
+		<!-- Inputs section -->
   		<div id="inputs-section">
-			<!-- Text inputs -->
-  			<div id="text-inputs">
-  				<!-- Time range input -->
-  				<div class="d-flex align-items-end mb-3">
-  					<div class="form-group text-input mr-2 mb-0">
-		  				<label>1) Select date range</label>
-		  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
-	  				</div>
+			<!-- Time range input -->
+			<div class="d-flex align-items-end mb-3">
+				<!-- Date range input -->
+				<div class="form-group text-input mr-2 mb-0">
+	  				<label>1) Select date range</label>
 
-	  				<button id="update-map-button" class="btn btn-primary" type="button">
-						Update map
-					</button>
-  				</div>
-	  			
-  				
-  			</div>
+	  				<input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
+				</div>
+
+				<!-- Update map button -->
+				<button id="update-map-button" class="btn btn-primary" type="button">
+					Update map
+				</button>
+			</div>
 
   			<!-- Monitor ID input -->
-	  			<div class="form-group text-input">
-	  				<label>2) Select monitor on map</label>
-	  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId" disabled>
-	  			</div>
+  			<div class="form-group text-input">
+  				<label>2) Select monitor on map</label>
 
-			<!-- Plot type input -->
+  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId" disabled>
+  			</div>
+
+			<!-- Plot type buttons area -->
 			<div id="plot-type-buttons">
 				<label>3) Select product</label>
 
@@ -230,15 +224,21 @@
 			</div>			
   		</div>
 
+  		<!-- Map date range label -->
   		<p id="map-date-range" class="mb-1">Hi</p>
 
+  		<!-- Leaflet map -->
   		<div id="leaflet-map" class="mb-3"></div>
 	</div>
 
+	<!-- Right-hand content area of the page -->
 	<div id="content-area">
+		<!-- Plot placeholder box -->
 		<div id="plot-placeholder">
+			<!-- Plot loading spinner -->
 			<div id="loading-spinner" class="invisible"></div>
 
+			<!-- Error alert box -->
 			<div id="error-box" class="alert alert-danger alert-dismissible invisible">
 				<h1>ERROR</h1>
 
@@ -250,6 +250,7 @@
 			</div>
 		</div>
 
+		<!-- Plot image -->
 		<img id="plot-image" src="" class="invisible">
 	</div>
 
