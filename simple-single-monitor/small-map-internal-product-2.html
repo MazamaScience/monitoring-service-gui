@@ -111,7 +111,6 @@
 			min-width: 250px;
 			max-width: 500px;
 			padding: 15px;
-			
 			top: 2%;
   			left: 50%;
   			transform: translate(-50%, 0%);
@@ -404,6 +403,8 @@
 					$("#dailybarplot-button").prop("disabled", false);
 					$("#dailybyhour-button").prop("disabled", false);
 					$("#timeseries-button").prop("disabled", false);
+
+					generatePlot();
 	       		});
 
 				// Add the marker to the markers layer
@@ -412,12 +413,11 @@
 
 			/**
 			 * Builds a plot request and sets the plot image to the resulting URL.
-			 * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
 			 */
-			function generatePlot(plotType) {
+			function generatePlot() {
 				hideErrorBox();
 
-				const plotRequestURL = buildPlotRequestURL(plotType);
+				const plotRequestURL = buildPlotRequestURL();
 			  
 				console.log("Plot request URL: " + plotRequestURL);
 			  
@@ -441,12 +441,12 @@
 
 			/**
 	         * Builds a URL request to the plot service API using form input.
-	         * @param plotType  the name of the type of plot to generate (dailybarplot|dailybyhour|timeseries)
 	         */
-			function buildPlotRequestURL(plotType) {
+			function buildPlotRequestURL() {
 				// Get form input
-				const monitorId = $("#monitorId").val();
 				const dateRange = $("input[name=daterange]").val().split(" - ");
+				const monitorId = $("#monitorId").val();
+				const plotType = selectedPlotType;
 
 				// Convert format of input date range
 				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
@@ -530,6 +530,13 @@
 			}, function(start, end, label) {});
 
 			/**
+       		 * React when a date range is changed.
+       		 */
+			$("input[name=daterange]").change(function() {
+			  	generatePlot();
+			});
+
+			/**
 			 * Update the map on button click.
 			 */
 			$("#update-map-button").click(function() {
@@ -539,23 +546,53 @@
 			/**
 			 * Generate a "dailybarplot" plot on button click.
 			 */
-			$("#dailybarplot-button").click(function() {	
-			 	generatePlot("dailybarplot");
+			$("#dailybarplot-button").click(function() {
+				selectedPlotType = "dailybarplot";
+			 	generatePlot();
+
+			 	resetPlotTypeButtons();
+
+			 	$(this).css('background-color', '#5cb85c');
+			 	$(this).css('border', '1px solid #5cb85c');
 			});
 
 			/**
 			 * Generate a "dailybyhour" plot on button click.
 			 */
 			$("#dailybyhour-button").click(function() {
-			 	generatePlot("dailybyhour");
+				selectedPlotType = "dailybyhour";
+			 	generatePlot();
+
+			 	resetPlotTypeButtons();
+
+			 	$(this).css('background-color', '#5cb85c');
+			 	$(this).css('border', '1px solid #5cb85c');
 			});
 
 			/**
 			 * Generate a "timeseries" plot on button click.
 			 */
 			$("#timeseries-button").click(function() {
-			 	generatePlot("timeseries");
+				selectedPlotType = "timeseries";
+			 	generatePlot();
+
+			 	resetPlotTypeButtons();
+
+			 	$(this).css('background-color', '#5cb85c');
+			 	$(this).css('border', '1px solid #5cb85c');
 			});
+
+			function resetPlotTypeButtons() {
+				// Rest buttons' background color
+				$("#dailybarplot-button").css('background-color', '#0275d8');
+				$("#dailybyhour-button").css('background-color', '#0275d8');
+				$("#timeseries-button").css('background-color', '#0275d8');
+
+				// Reset buttons' border color
+			 	$("#dailybarplot-button").css('border', '1px solid #0275d8');
+			 	$("#dailybyhour-button").css('border', '1px solid #0275d8');
+			 	$("#timeseries-button").css('border', '1px solid #0275d8');
+			}
 
 			/**
 			 * React when the plot image loads.
@@ -657,6 +694,10 @@
 
 			// The currently selected monitor marker
 			var selectedMonitor = null;
+			var selectedPlotType = "dailybarplot";
+
+			$("#dailybarplot-button").css('background-color', '#5cb85c');
+			$("#dailybarplot-button").css('border', '1px solid #5cb85c');
 		});
 	</script>
 </body>
