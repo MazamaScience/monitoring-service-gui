@@ -70,14 +70,25 @@
 			margin-bottom: 2px;
 		}
 
-		label.form-check-label {
-			font-weight: normal;
-		}
-
 		#text-inputs {
 			display: flex;
 			flex-direction: row;
 			justify-content: space-between;
+		}
+
+		.btn-selected {
+			background-color: #5cb85c;
+			border: 1px solid #5cb85c;
+		}
+
+		.btn-selected:disabled {
+			background-color: #4ba74b;
+			border: 1px solid #4ba74b;
+		}
+
+		.btn-selected:focus {
+			background-color: #4ba74b;
+			border: 1px solid #4ba74b;
 		}
 
 		#map-date-range {
@@ -204,15 +215,15 @@
 				<label>3) Select product</label>
 
 				<div class="d-flex flex-row">
-					<button id="dailybarplot-button" class="btn btn-primary mr-1" type="button">
+					<button id="dailybarplot-button" class="plot-type-button btn btn-primary mr-1" type="button">
 						Daily average
 					</button>
 
-					<button id="dailybyhour-button" class="btn btn-primary mr-1" type="button">
+					<button id="dailybyhour-button" class="plot-type-button btn btn-primary mr-1" type="button">
 						Time of day
 					</button>
 
-					<button id="timeseries-button" class="btn btn-primary" type="button">
+					<button id="timeseries-button" class="plot-type-button btn btn-primary" type="button">
 						Time series
 					</button>
 				</div>
@@ -530,7 +541,7 @@
 			}, function(start, end, label) {});
 
 			/**
-       		 * React when a date range is changed.
+       		 * Generate plot when the date range is changed.
        		 */
 			$("input[name=daterange]").change(function() {
 			  	generatePlot();
@@ -547,51 +558,46 @@
 			 * Generate a "dailybarplot" plot on button click.
 			 */
 			$("#dailybarplot-button").click(function() {
+				// Generate plot
 				selectedPlotType = "dailybarplot";
 			 	generatePlot();
 
+			 	// Highlight this button
 			 	resetPlotTypeButtons();
-
-			 	$(this).css('background-color', '#5cb85c');
-			 	$(this).css('border', '1px solid #5cb85c');
+			 	$(this).addClass("btn-selected");
 			});
 
 			/**
 			 * Generate a "dailybyhour" plot on button click.
 			 */
 			$("#dailybyhour-button").click(function() {
+				// Generate plot
 				selectedPlotType = "dailybyhour";
 			 	generatePlot();
 
+			 	// Highlight this button
 			 	resetPlotTypeButtons();
-
-			 	$(this).css('background-color', '#5cb85c');
-			 	$(this).css('border', '1px solid #5cb85c');
+			 	$(this).addClass("btn-selected");
 			});
 
 			/**
 			 * Generate a "timeseries" plot on button click.
 			 */
 			$("#timeseries-button").click(function() {
+				// Generate plot
 				selectedPlotType = "timeseries";
 			 	generatePlot();
 
+			 	// Highlight this button
 			 	resetPlotTypeButtons();
-
-			 	$(this).css('background-color', '#5cb85c');
-			 	$(this).css('border', '1px solid #5cb85c');
+			 	$(this).addClass("btn-selected");
 			});
 
+			/**
+			 * Resets the style of the plot type buttons so none appear selected.
+			 */
 			function resetPlotTypeButtons() {
-				// Rest buttons' background color
-				$("#dailybarplot-button").css('background-color', '#007bff');
-				$("#dailybyhour-button").css('background-color', '#007bff');
-				$("#timeseries-button").css('background-color', '#007bff');
-
-				// Reset buttons' border color
-			 	$("#dailybarplot-button").css('border', '1px solid #007bff');
-			 	$("#dailybyhour-button").css('border', '1px solid #007bff');
-			 	$("#timeseries-button").css('border', '1px solid #007bff');
+				$(".plot-type-button").removeClass("btn-selected");
 			}
 
 			/**
@@ -692,12 +698,12 @@
 			// Add monitor markers to the map for the initial date range
 			updateMap();
 
-			// The currently selected monitor marker
+			// Set the currently selected monitor marker
 			var selectedMonitor = null;
-			var selectedPlotType = "dailybarplot";
 
-			$("#dailybarplot-button").css('background-color', '#5cb85c');
-			$("#dailybarplot-button").css('border', '1px solid #5cb85c');
+			// Set the currently selected plot type
+			var selectedPlotType = "dailybarplot";
+			$("#dailybarplot-button").addClass("btn-selected");
 		});
 	</script>
 </body>
