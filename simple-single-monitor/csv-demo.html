@@ -70,6 +70,14 @@
 			width: 220px;
 		}
 
+		.list-group {
+			height: 100px;
+			overflow-y: scroll;
+			border: 1px solid rgba(0,0,0,.125);
+			border-radius: 0.25rem;
+			background-color: WhiteSmoke;
+		}
+
 		.btn-selected {
 			background-color: #5cb85c;
 			border: 1px solid #5cb85c;
@@ -198,10 +206,10 @@
 			</div>
 
   			<!-- Monitor ID input -->
-  			<div class="form-group text-input">
+  			<div class="form-group">
   				<label>2) Select monitors on map</label>
 
-  				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId" disabled>
+				<ul id="monitorIds-list" class="list-group list-group-flush"></ul>
   			</div>
 
 			<!-- Plot type buttons area -->
@@ -399,6 +407,8 @@
 							fillColor: "#007bff",
 							weight: 1.6,
 	        			});
+
+	        			$('#' + monitorId + '-list-item').remove();
 	        		} else {
 	        			// Select and highlight the monitor marker if it wasn't already selected
 		        		selectedMonitorIds.push(monitorId);
@@ -409,6 +419,9 @@
 		        		});
 
 		        		monitorMarker.bringToFront();
+
+
+		        		$('#monitorIds-list').append($('<li id="' + monitorId + '-list-item" class="list-group-item py-1">').text(monitorId));
 	        		}
 
 	        		// Enable the product type selectors
