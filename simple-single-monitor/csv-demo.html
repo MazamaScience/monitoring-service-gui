@@ -208,17 +208,9 @@
 			<div id="plot-type-buttons">
 				<label>3) Select product</label>
 
-				<div class="d-flex flex-row">
-					<button id="dailybarplot-button" class="plot-type-button btn btn-primary mr-1" type="button">
-						Daily average
-					</button>
-
-					<button id="dailybyhour-button" class="plot-type-button btn btn-primary mr-1" type="button">
-						Time of day
-					</button>
-
-					<button id="timeseries-button" class="plot-type-button btn btn-primary" type="button">
-						Time series
+				<div class="d-flex flex-row flex-wrap">
+					<button id="dailyaveragetable-button" class="plot-type-button btn btn-primary" type="button">
+						Daily average table
 					</button>
 				</div>
 			</div>			
@@ -398,113 +390,33 @@
 					$("#monitorId").focus();
 	        		$("#monitorId").val(monitorId);
 
-	        		// Un-highlight the previously selected monitor marker
-	        		if (selectedMonitor != null) {
-	        			selectedMonitor.setStyle({
+	        		if (selectedMonitorIds.includes(monitorId)) {
+	        			selectedMonitorIds.splice(selectedMonitorIds.indexOf(monitorId), 1);
+
+	        			monitorMarker.setStyle({
 							color: "#0037aa",
 							fillColor: "#007bff",
 							weight: 1.6,
 	        			});
-	        		} 
+	        		} else {
+	        			selectedMonitorMarkers.push(monitorMarker);
+		        		selectedMonitorIds.push(monitorId);
 
-	        		selectedMonitor = monitorMarker;
+		        		// Highlight the newly selected monitor
+		        		monitorMarker.setStyle({
+		        			color: "#000000",
+		        			weight: 4
+		        		});
 
-	        		// Highlight the newly selected monitor
-	        		selectedMonitor.setStyle({
-	        			color: "#000000",
-	        			weight: 4
-	        		});
-
-	        		selectedMonitor.bringToFront();
+		        		monitorMarker.bringToFront();
+	        		}
 
 	        		// Enable the product type selectors
-					$("#dailybarplot-button").prop("disabled", false);
-					$("#dailybyhour-button").prop("disabled", false);
-					$("#timeseries-button").prop("disabled", false);
-
-					generatePlot();
+					$("#dailyaveragetable-button").prop("disabled", false);
 	       		});
 
 				// Add the marker to the markers layer
 		        monitorMarker.addTo(monitorMarkersLayerGroup);
-			}
-
-			/**
-			 * Builds a plot request and sets the plot image to the resulting URL.
-			 */
-			function generatePlot() {
-				$("#page-status-message").text("Generating plot...");
-
-				hideErrorBox();
-
-				const plotRequestURL = buildPlotRequestURL();
-			  
-				console.log("Plot request URL: " + plotRequestURL);
-			  
-			  	if (plotRequestURL != null) {
-			    	// Update plot image source
-					$("#plot-image").attr("src", plotRequestURL);
-
-					// Hide plot image
-					$("#plot-image").removeClass("visible");
-					$("#plot-image").addClass("invisible");
-
-					// Show plot placeholder
-					$("#plot-placeholder").removeClass("invisible");
-					$("#plot-placeholder").addClass("visible");
-
-					// Show loading spinner
-					$("#loading-spinner").removeClass("invisible");
-					$("#loading-spinner").addClass("visible");
-			  	}
-			}
-
-			/**
-	         * Builds a URL request to the plot service API using form input.
-	         */
-			function buildPlotRequestURL() {
-				// Get form input
-				const dateRange = $("input[name=daterange]").val().split(" - ");
-				const monitorId = $("#monitorId").val();
-				const plotType = selectedPlotType;
-
-				if (dateRange.length == 0 || monitorId.length == 0 || plotType.length == 0) return null;
-
-				// Convert format of input date range
-				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
-				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
-				
-				// Build plot request query string
-				const queryParams = 
-					"databaseversion=4.0" +
-				  	"&webserviceapi=4.0" + 
-					"&plottype="  + plotType +
-					"&monitorid=" + monitorId +
-					"&startdate=" + startDate +
-					"&enddate="   + endDate;
-
-				// Build full plot image request URL
-				const plotRequestURL = plotServicePath + plotServiceName + "?" + queryParams;
-				
-				// Build plot json request URL
-        		const jsonRequestURL = plotRequestURL + "&responsetype=json";
-        
-		        // Request the JSON response first to check for server-side errors
-		        fetch(jsonRequestURL, { mode: 'cors' })
-					.then(response => response.json())
-					.then(data => {
-						console.log(data);
-
-						if (data.status == "error") {
-					  		handleServerError(data.errors);
-					  		return null;
-					  	}
-					})
-					.catch(error => {
-						return null;
-					});
-				
-				return plotRequestURL;
 			}
 
 			/**
@@ -568,40 +480,73 @@
 			/**
 			 * Generate a "dailybarplot" plot on button click.
 			 */
-			$("#dailybarplot-button").click(function() {
-				// Generate plot
-				selectedPlotType = "dailybarplot";
-			 	generatePlot();
+			$("#dailyaveragetable-button").click(function() {
+				$("#page-status-message").text("Generating daily average table...");
 
-			 	// Highlight this button
+			 	// Get form input
+				const dateRange = $("input[name=daterange]").val().split(" - ");
+				const monitorId = $("#monitorId").val();
+
+				let monitorIds = (selectedMonitorIds.length > 0) ? selectedMonitorIds[0] : "";
+
+				for (let i = 1; i < selectedMonitorIds.length; i++) {
+					monitorIds += "," + selectedMonitorIds[i];
+				}
+
+
+				// Convert format of input date range
+				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
+				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
+
+			 	// Build product request query string
+				const queryParams = 
+					"csvtype=human" +
+					"&monitorids=" + monitorIds +
+					"&startdate=" + startDate +
+					"&enddate=" + endDate +
+					"&outputfiletype=csv";
+
+				// Build product request URL
+				const productRequestUrl = dataServicePath + dailyaveragetableServiceName + "?" + queryParams;
+
+				// Build product json request URL
+        		const jsonRequestUrl = productRequestUrl + "&responsetype=json";
+
+        		console.log(jsonRequestUrl);
+        
+		        // Request the JSON response first to check for server-side errors
+		        fetch(jsonRequestUrl, { mode: 'cors' })
+					.then(response => response.json())
+					.then(data => {
+						console.log(data);
+
+						if (data.status == "error") {
+					  		handleServerError(data.errors);
+					  		$("#page-status-message").text("Failed to generate daily average table.");
+					  		return null;
+					  	}
+
+					  	// Create a temporary download link, programatically click it, and then remove it frome the page
+						var link = document.createElement("a");
+					    link.setAttribute("download", "");
+					    link.href = productRequestUrl;
+					    document.body.appendChild(link);
+					    link.click();
+					    link.remove();
+
+					    $("#page-status-message").text("Downloaded daily average table.");
+					})
+					.catch(error => {
+						return null;
+					});
+
+				
+
+			 	// Highlight the dailyaveragetable button
 			 	resetPlotTypeButtons();
 			 	$(this).addClass("btn-selected");
-			});
 
-			/**
-			 * Generate a "dailybyhour" plot on button click.
-			 */
-			$("#dailybyhour-button").click(function() {
-				// Generate plot
-				selectedPlotType = "dailybyhour";
-			 	generatePlot();
-
-			 	// Highlight this button
-			 	resetPlotTypeButtons();
-			 	$(this).addClass("btn-selected");
-			});
-
-			/**
-			 * Generate a "timeseries" plot on button click.
-			 */
-			$("#timeseries-button").click(function() {
-				// Generate plot
-				selectedPlotType = "timeseries";
-			 	generatePlot();
-
-			 	// Highlight this button
-			 	resetPlotTypeButtons();
-			 	$(this).addClass("btn-selected");
+			 	
 			});
 
 			/**
@@ -609,25 +554,6 @@
 			 */
 			function resetPlotTypeButtons() {
 				$(".plot-type-button").removeClass("btn-selected");
-			}
-
-			/**
-			 * React when the plot image loads.
-			 */
-			document.getElementById("plot-image").onload = function() {
-				$("#page-status-message").text("Finished generating plot");
-
-				// Hide loading spinner
-				$("#loading-spinner").removeClass("visible");
-				$("#loading-spinner").addClass("invisible");
-
-				// Hide plot placeholder
-				$("#plot-placeholder").removeClass("visible");
-				$("#plot-placeholder").addClass("invisible");
-
-				// Show plot image
-				$("#plot-image").removeClass("invisible");
-				$("#plot-image").addClass("visible");
 			}
 			
 			/** 
@@ -654,9 +580,7 @@
 				$("#monitorId").val("");
 
 				// Disable the product type selectors
-				$("#dailybarplot-button").prop("disabled", true);
-				$("#dailybyhour-button").prop("disabled", true);
-				$("#timeseries-button").prop("disabled", true);
+				$("#dailyaveragetable-button").prop("disabled", true);
 			}
 			
 			/**
@@ -676,13 +600,10 @@
 
     		// ----- Script start ------------------------------------------------------------------------
 
-		  	// Service for plot products
-		  	const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
-		  	const plotServiceName = "plot";
-
 		  	// Service for monitor GeoJSON products
 		  	const dataServicePath = "https://tools.airfire.org/monitor-data/v4/";
 		  	const geoJsonServiceName = "geojson";
+		  	const dailyaveragetableServiceName = "data";
 
 		  	// Create the Leaflet map centered on the continental US
 			var monitorMap = L.map('leaflet-map', {
@@ -711,8 +632,8 @@
 			// Add monitor markers to the map for the initial date range
 			updateMap();
 
-			// Set the currently selected monitor marker
-			var selectedMonitor = null;
+			const selectedMonitorMarkers = [];
+			const selectedMonitorIds = [];
 
 			// Set the currently selected plot type
 			var selectedPlotType = "";
