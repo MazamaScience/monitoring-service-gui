@@ -391,6 +391,7 @@
 	        		$("#monitorId").val(monitorId);
 
 	        		if (selectedMonitorIds.includes(monitorId)) {
+	        			// Deselect and dehighlight the monitor marker if it was already selected
 	        			selectedMonitorIds.splice(selectedMonitorIds.indexOf(monitorId), 1);
 
 	        			monitorMarker.setStyle({
@@ -399,10 +400,9 @@
 							weight: 1.6,
 	        			});
 	        		} else {
-	        			selectedMonitorMarkers.push(monitorMarker);
+	        			// Select and highlight the monitor marker if it wasn't already selected
 		        		selectedMonitorIds.push(monitorId);
 
-		        		// Highlight the newly selected monitor
 		        		monitorMarker.setStyle({
 		        			color: "#000000",
 		        			weight: 4
@@ -485,18 +485,16 @@
 
 			 	// Get form input
 				const dateRange = $("input[name=daterange]").val().split(" - ");
-				const monitorId = $("#monitorId").val();
-
-				let monitorIds = (selectedMonitorIds.length > 0) ? selectedMonitorIds[0] : "";
-
-				for (let i = 1; i < selectedMonitorIds.length; i++) {
-					monitorIds += "," + selectedMonitorIds[i];
-				}
-
 
 				// Convert format of input date range
 				const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
 				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
+
+				// Gather and format selected monitor ids
+				let monitorIds = (selectedMonitorIds.length > 0) ? selectedMonitorIds[0] : "";
+				for (let i = 1; i < selectedMonitorIds.length; i++) {
+					monitorIds += "," + selectedMonitorIds[i];
+				}
 
 			 	// Build product request query string
 				const queryParams = 
@@ -512,7 +510,7 @@
 				// Build product json request URL
         		const jsonRequestUrl = productRequestUrl + "&responsetype=json";
 
-        		console.log(jsonRequestUrl);
+        		console.log("Product request URL: " + productRequestUrl);
         
 		        // Request the JSON response first to check for server-side errors
 		        fetch(jsonRequestUrl, { mode: 'cors' })
@@ -539,8 +537,6 @@
 					.catch(error => {
 						return null;
 					});
-
-				
 
 			 	// Highlight the dailyaveragetable button
 			 	resetPlotTypeButtons();
@@ -632,7 +628,6 @@
 			// Add monitor markers to the map for the initial date range
 			updateMap();
 
-			const selectedMonitorMarkers = [];
 			const selectedMonitorIds = [];
 
 			// Set the currently selected plot type
