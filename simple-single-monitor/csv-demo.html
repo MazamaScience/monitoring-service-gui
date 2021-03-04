@@ -199,7 +199,7 @@
 
   			<!-- Monitor ID input -->
   			<div class="form-group text-input">
-  				<label>2) Select monitor on map</label>
+  				<label>2) Select monitors on map</label>
 
   				<input id="monitorId" type="text" class="form-control input-sm" name="monitorId" disabled>
   			</div>
@@ -276,7 +276,7 @@
 				const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYY-MM-DD');
 
 				// Update the map date range label
-				$("#map-date-range").text("Monitors with data " + startDate + " to " + endDate);
+				$("#map-date-range").text("Monitors with data from " + startDate + " to " + endDate);
 
 				// Hide plot image
 				$("#plot-image").removeClass("visible");
