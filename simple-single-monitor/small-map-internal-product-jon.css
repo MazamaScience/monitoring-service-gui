@@ -1,0 +1,139 @@
+body {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	background-color: WhiteSmoke;
+}
+
+h1 {
+	font-size: 32px;
+	text-align: center;
+	margin-bottom: 16px;
+}
+
+#toolbar {
+	width: 450px;
+	min-width: 450px;
+	height: 100vh;
+	padding: 0px 20px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background-color: White;
+	box-shadow: gray 0px 0px 15px;
+	z-index: 2;
+}
+
+#inputs-section {
+	width: 100%;
+	margin-bottom: 25px;
+	display: flex;
+	flex-direction: column;
+}
+
+#daterange, #monitorId {
+	width: 220px;
+}
+
+label {
+	font-weight: bold;
+	margin-bottom: 2px;
+}
+
+label.form-check-label {
+	font-weight: normal;
+}
+
+#text-inputs {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+#map-date-range {
+	font-size: 12px;
+}
+
+#leaflet-map {
+	width: 100%;
+	height: 100%;
+}
+
+#content-area {
+	padding: 40px;
+	flex-grow: 1;
+	z-index: 1;
+}
+
+#plot-placeholder {
+	width: 700px;
+	height: 700px;
+	position: relative;
+	border: 10px dashed LightGray;
+}
+
+#plot-image {
+	max-height: 100%;
+	box-shadow: 0px 0px 10px gray;
+}
+
+#error-box {
+	min-width: 250px;
+	max-width: 500px;
+	padding: 15px;
+	
+	top: 2%;
+		left: 50%;
+		transform: translate(-50%, 0%);
+		z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	border: 2px solid Red;
+}
+
+#error-box h1 {
+  font-size: 22px;
+  color: Red;
+}
+
+#error-box p {
+  margin: 0px;
+  font-family: monospace;
+}
+
+#loading-spinner {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 100px;
+	height: 100px;
+	transform-origin: 0% 0%;
+	border: 12px solid WhiteSmoke;
+	border-top: 12px solid #007bff;
+	border-radius: 50%;
+	animation: spin 0.45s linear infinite;
+	-webkit-animation: spin 0.45s linear infinite; /* Safari */
+}
+
+.visible {
+	display: block;
+}
+
+.invisible {
+	display: none;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg) translate(-50%, -50%); }
+	100% { transform: rotate(360deg) translate(-50%, -50%); }
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+	0% { -webkit-transform: rotate(0deg) translate(-50%, -50%); }
+	100% { -webkit-transform: rotate(360deg) translate(-50%, -50%); }
+}
