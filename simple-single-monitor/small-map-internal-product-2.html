@@ -19,7 +19,7 @@
   <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
   
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
@@ -117,9 +117,9 @@
       max-width: 500px;
       padding: 15px;
       top: 2%;
-        left: 50%;
-        transform: translate(-50%, 0%);
-        z-index: 1000;
+      left: 50%;
+      transform: translate(-50%, 0%);
+      z-index: 1000;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -186,9 +186,9 @@
       <div class="d-flex align-items-end mb-3">
         <!-- Date range input -->
         <div class="form-group text-input mr-2 mb-0">
-            <label>1) Select date range</label>
+          <label>1) Select date range</label>
 
-            <input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
+          <input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
         </div>
 
         <!-- Update map button -->
@@ -258,7 +258,8 @@
 
   <script type="text/javascript">
     $(function() {
-        // ----- Functions --------------------------------------
+      // ----- Functions --------------------------------------
+      
       /**
        * Loads and displays markers for monitors present in the current date range.
        */
@@ -323,13 +324,13 @@
        * @param monitorsGeoJsonRequestUrl  the URL request for the monitors GeoJSON file
        */
       function addMonitorMarkers(monitorsGeoJsonRequestUrl) {
-            fetch(monitorsGeoJsonRequestUrl, { mode: 'cors' })
+        fetch(monitorsGeoJsonRequestUrl, { mode: 'cors' })
           .then(response => response.json())
           .then(data => {
             if (data.status == "error") {
-                handleServerError(data.errors);
-                return null;
-              }
+              handleServerError(data.errors);
+              return null;
+            }
 
             // Create and add a marker for each monitor feature
             L.geoJSON(data, {
@@ -351,11 +352,11 @@
        */
       function createMonitorMarker(monitorFeature, layer) {
         // Skip if the feature doesn't have a monitor ID
-          if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) {
-            return;
-          }
+        if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) {
+          return;
+        }
 
-          // Get monitor ID and site name
+        // Get monitor ID and site name
         const monitorId = monitorFeature.properties.monitorID;
         const siteName = monitorFeature.properties.siteName;
         const dataSource = monitorFeature.properties.dataSource;
@@ -363,8 +364,8 @@
           ? "circle"
           : "triangle";
 
-          // Get monitor coordinates
-          const coords = monitorFeature.geometry.coordinates;
+        // Get monitor coordinates
+        const coords = monitorFeature.geometry.coordinates;
         const lon = coords[0];
         const lat = coords[1];
 
@@ -396,26 +397,26 @@
         monitorMarker.on('click', function(e) {
           // Focus on and populate the monitor ID input field
           $("#monitorId").focus();
-              $("#monitorId").val(monitorId);
+          $("#monitorId").val(monitorId);
 
-              // Un-highlight the previously selected monitor marker
-              if (selectedMonitor != null) {
-                selectedMonitor.setStyle({
+          // Un-highlight the previously selected monitor marker
+          if (selectedMonitor != null) {
+            selectedMonitor.setStyle({
               color: "#0037aa",
               fillColor: "#007bff",
-              weight: 1.6,
-                });
-              } 
+              weight: 1.6
+            });
+          } 
 
-              selectedMonitor = monitorMarker;
+          selectedMonitor = monitorMarker;
 
-              // Highlight the newly selected monitor
-              selectedMonitor.setStyle({
-                color: "#000000",
-                weight: 4
-              });
+          // Highlight the newly selected monitor
+          selectedMonitor.setStyle({
+            color: "#000000",
+            weight: 4
+          });
 
-              selectedMonitor.bringToFront();
+          selectedMonitor.bringToFront();
 
               // Enable the product type selectors
           $("#dailybarplot-button").prop("disabled", false);
@@ -423,10 +424,10 @@
           $("#timeseries-button").prop("disabled", false);
 
           generatePlot();
-            });
+        });
 
         // Add the marker to the markers layer
-            monitorMarker.addTo(monitorMarkersLayerGroup);
+        monitorMarker.addTo(monitorMarkersLayerGroup);
       }
 
       /**
@@ -441,22 +442,22 @@
         
         console.log("Plot request URL: " + plotRequestURL);
         
-          if (plotRequestURL != null) {
-            // Update plot image source
-          $("#plot-image").attr("src", plotRequestURL);
+        if (plotRequestURL != null) {
+          // Update plot image source
+        $("#plot-image").attr("src", plotRequestURL);
 
-          // Hide plot image
-          $("#plot-image").removeClass("visible");
-          $("#plot-image").addClass("invisible");
+        // Hide plot image
+        $("#plot-image").removeClass("visible");
+        $("#plot-image").addClass("invisible");
 
-          // Show plot placeholder
-          $("#plot-placeholder").removeClass("invisible");
-          $("#plot-placeholder").addClass("visible");
+        // Show plot placeholder
+        $("#plot-placeholder").removeClass("invisible");
+        $("#plot-placeholder").addClass("visible");
 
-          // Show loading spinner
-          $("#loading-spinner").removeClass("invisible");
-          $("#loading-spinner").addClass("visible");
-          }
+        // Show loading spinner
+        $("#loading-spinner").removeClass("invisible");
+        $("#loading-spinner").addClass("visible");
+        }
       }
 
       /**
@@ -487,10 +488,10 @@
         const plotRequestURL = plotServicePath + plotServiceName + "?" + queryParams;
         
         // Build plot json request URL
-            const jsonRequestURL = plotRequestURL + "&responsetype=json";
+        const jsonRequestURL = plotRequestURL + "&responsetype=json";
         
-            // Request the JSON response first to check for server-side errors
-            fetch(jsonRequestURL, { mode: 'cors' })
+        // Request the JSON response first to check for server-side errors
+        fetch(jsonRequestURL, { mode: 'cors' })
           .then(response => response.json())
           .then(data => {
             console.log(data);
@@ -502,7 +503,8 @@
           })
           .catch(error => {
             return null;
-          });
+          }
+        );
         
         return plotRequestURL;
       }
@@ -541,21 +543,21 @@
       // ----- Page element behavior --------------------------------------------------------------------------
 
       /**
-         * Open the date input field as a DateRangerPicker widget and set its options.
-         */
+       * Open the date input field as a DateRangerPicker widget and set its options.
+       */
       $("input[name=daterange]").daterangepicker({
         startDate: moment().subtract(10, "day").startOf("day").toDate(),
-            endDate: moment().startOf("day").toDate(),
-            minDate: "01/01/1998",
-            maxDate: moment().startOf("day").toDate(),
+        endDate: moment().startOf("day").toDate(),
+        minDate: "01/01/1998",
+        maxDate: moment().startOf("day").toDate(),
         opens: "left"
       }, function(start, end, label) {});
 
       /**
-           * Generate plot when the date range is changed.
-           */
+       * Generate plot when the date range is changed.
+       */
       $("input[name=daterange]").change(function() {
-          generatePlot();
+        generatePlot();
       });
 
       /**
@@ -635,8 +637,8 @@
        * @param message  the message to display
        */
       function showErrorBox(message) {
-          // Set error box text
-          $("#error-box-message").text(message);
+        // Set error box text
+        $("#error-box-message").text(message);
         
         $("#error-box").removeClass("invisible");
         $("#error-box").addClass("visible");
@@ -671,18 +673,18 @@
        * Hide the error box when its close button is clicked.
        */
       $(".close").on("click", function () {
-            hideErrorBox();
-        });
+        hideErrorBox();
+      });
 
-        // ----- Script start ------------------------------------------------------------------------
+      // ----- Script start ------------------------------------------------------------------------
 
-        // Service for plot products
-        const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
-        const plotServiceName = "plot";
+      // Service for plot products
+      const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
+      const plotServiceName = "plot";
 
-        // Service for monitor GeoJSON products
-        const dataServicePath = "https://tools.airfire.org/monitor-data/v4/";
-        const geoJsonServiceName = "geojson";
+      // Service for monitor GeoJSON products
+      const dataServicePath = "https://tools.airfire.org/monitor-data/v4/";
+      const geoJsonServiceName = "geojson";
 
         // Create the Leaflet map centered on the continental US
       var monitorMap = L.map('leaflet-map', {
