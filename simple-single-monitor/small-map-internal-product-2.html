@@ -126,7 +126,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      
+
     </div>
 
     <img id="plot-image" src="" class="invisible">
@@ -135,8 +135,149 @@
 
   <script type="text/javascript">
     $(function() {
-      // ----- Functions --------------------------------------
+
+      // ----- Page State ------------------------------------------------------
+
+       // Service for plot products
+      const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
+      const plotServiceName = "plot";
+
+      // Service for monitor GeoJSON products
+      const dataServicePath = "https://tools.airfire.org/monitor-data/v4/";
+      const geoJsonServiceName = "geojson";
+
+      // Set the currently selected monitor marker
+      var selectedMonitor = null;
+
+      // Set the currently selected plot type
+      var selectedPlotType = "dailybarplot";
       
+      // ----- Initialize Page -------------------------------------------------
+
+      // Create the DateRangerPicker
+      $("input[name=daterange]").daterangepicker({
+        startDate: moment().subtract(10, "day").startOf("day").toDate(),
+        endDate: moment().startOf("day").toDate(),
+        minDate: "01/01/1998",
+        maxDate: moment().startOf("day").toDate(),
+        opens: "left"
+      }, function(start, end, label) {});
+
+      // Highlight the dailybarplot button
+      $("#dailybarplot-button").addClass("btn-selected");
+      
+      // Create the Leaflet map centered on the continental US
+      var monitorMap = L.map('leaflet-map', {
+        preferCanvas: false
+      }).setView([39.5, -98.35], 3);
+
+      // Create a canvas layer
+      var mapRenderer = L.canvas({ padding: 0.5 });
+
+      // Create a Stamen tile layer
+      var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
+        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        subdomains: 'abcd',
+        minZoom: 3,
+        maxZoom: 15,
+        ext: 'png'
+      })
+
+      // Create a layer group for all the monitor markers
+      var monitorMarkersLayerGroup = L.layerGroup();
+
+      // Add layers to the map
+      monitorMap.addLayer(tileLayer);
+      monitorMap.addLayer(monitorMarkersLayerGroup);
+
+      // Add monitor markers to the map for the initial date range
+      updateMap();
+
+      // ----- Attach Listeners ------------------------------------------------
+
+      /**
+       * Generate plot when the date range is changed.
+       */
+      $("input[name=daterange]").change(function() {
+        generatePlot();
+      });
+
+      /**
+       * Update the map on button click.
+       */
+      $("#update-map-button").click(function() {
+        updateMap();
+      });
+
+      /**
+       * Generate a "dailybarplot" plot on button click.
+       */
+      $("#dailybarplot-button").click(function() {
+        // Generate plot
+        selectedPlotType = "dailybarplot";
+        generatePlot();
+
+        // Highlight this button
+        resetPlotTypeButtons();
+        $(this).addClass("btn-selected");
+      });
+
+      /**
+       * Generate a "dailybyhour" plot on button click.
+       */
+      $("#dailybyhour-button").click(function() {
+        // Generate plot
+        selectedPlotType = "dailybyhour";
+        generatePlot();
+
+        // Highlight this button
+        resetPlotTypeButtons();
+        $(this).addClass("btn-selected");
+      });
+
+      /**
+       * Generate a "timeseries" plot on button click.
+       */
+      $("#timeseries-button").click(function() {
+        // Generate plot
+        selectedPlotType = "timeseries";
+        generatePlot();
+
+        // Highlight this button
+        resetPlotTypeButtons();
+        $(this).addClass("btn-selected");
+      });
+
+      /**
+       * React when the plot image loads.
+       */
+      document.getElementById("plot-image").onload = function() {
+        $("#page-status-message").text("Finished generating plot");
+
+        // Hide loading spinner
+        $("#loading-spinner").removeClass("visible");
+        $("#loading-spinner").addClass("invisible");
+
+        // Hide plot placeholder
+        $("#plot-placeholder").removeClass("visible");
+        $("#plot-placeholder").addClass("invisible");
+
+        // Show plot image
+        $("#plot-image").removeClass("invisible");
+        $("#plot-image").addClass("visible");
+      }
+
+      /**
+       * Hide the error box when its close button is clicked.
+       */
+      $(".close").on("click", function () {
+        hideErrorBox();
+      });
+
+      // ===== END PAGE DEFINITION, BEGIN SUPPORTING FUNCTIONS =================
+
+      // ----- Map Functions ---------------------------------------------------
+
       /**
        * Loads and displays markers for monitors present in the current date range.
        */
@@ -159,7 +300,7 @@
 
         // Convert format of input date range
         const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYY-MM-DD'); 
-        const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYY-MM-DD');
+        const endDate = moment(dateRange[1], "MM/DD/YYYY").format('YYYY-MM-DD');
 
         // Update the map date range label
         $("#map-date-range").text("Monitors with data " + startDate + " to " + endDate);
@@ -183,12 +324,12 @@
 
         // Convert format of input date range
         const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD'); 
-        const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
+        const endDate = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
         
         // Build plot request query string
         const queryParams = 
           "startdate=" + startDate +
-          "&enddate="   + endDate;
+          "&enddate=" + endDate;
 
         // Build full monitors GeoJSON request URL
         const monitorsGeoJsonRequestUrl = dataServicePath + geoJsonServiceName + "?" + queryParams;
@@ -307,6 +448,8 @@
         monitorMarker.addTo(monitorMarkersLayerGroup);
       }
 
+      // ----- Other Functions -------------------------------------------------
+
       /**
        * Builds a plot request and sets the plot image to the resulting URL.
        */
@@ -417,98 +560,6 @@
         showErrorBox(errorBoxMessage);
       }
 
-      // ----- Page element behavior --------------------------------------------------------------------------
-
-      /**
-       * Open the date input field as a DateRangerPicker widget and set its options.
-       */
-      $("input[name=daterange]").daterangepicker({
-        startDate: moment().subtract(10, "day").startOf("day").toDate(),
-        endDate: moment().startOf("day").toDate(),
-        minDate: "01/01/1998",
-        maxDate: moment().startOf("day").toDate(),
-        opens: "left"
-      }, function(start, end, label) {});
-
-      /**
-       * Generate plot when the date range is changed.
-       */
-      $("input[name=daterange]").change(function() {
-        generatePlot();
-      });
-
-      /**
-       * Update the map on button click.
-       */
-      $("#update-map-button").click(function() {
-        updateMap();
-      });
-
-      /**
-       * Generate a "dailybarplot" plot on button click.
-       */
-      $("#dailybarplot-button").click(function() {
-        // Generate plot
-        selectedPlotType = "dailybarplot";
-        generatePlot();
-
-        // Highlight this button
-        resetPlotTypeButtons();
-        $(this).addClass("btn-selected");
-      });
-
-      /**
-       * Generate a "dailybyhour" plot on button click.
-       */
-      $("#dailybyhour-button").click(function() {
-        // Generate plot
-        selectedPlotType = "dailybyhour";
-        generatePlot();
-
-        // Highlight this button
-        resetPlotTypeButtons();
-        $(this).addClass("btn-selected");
-      });
-
-      /**
-       * Generate a "timeseries" plot on button click.
-       */
-      $("#timeseries-button").click(function() {
-        // Generate plot
-        selectedPlotType = "timeseries";
-        generatePlot();
-
-        // Highlight this button
-        resetPlotTypeButtons();
-        $(this).addClass("btn-selected");
-      });
-
-      /**
-       * Resets the style of the plot type buttons so none appear selected.
-       */
-      function resetPlotTypeButtons() {
-        $(".plot-type-button").removeClass("btn-selected");
-      }
-
-      /**
-       * React when the plot image loads.
-       */
-      document.getElementById("plot-image").onload = function() {
-        $("#page-status-message").text("Finished generating plot");
-
-        // Hide loading spinner
-        $("#loading-spinner").removeClass("visible");
-        $("#loading-spinner").addClass("invisible");
-
-        // Hide plot placeholder
-        $("#plot-placeholder").removeClass("visible");
-        $("#plot-placeholder").addClass("invisible");
-
-        // Show plot image
-        $("#plot-image").removeClass("invisible");
-        $("#plot-image").addClass("visible");
-      }
-      
       /** 
        * Show the error box with a message.
        * @param message  the message to display
@@ -526,6 +577,14 @@
       }
 
       /**
+       * Hide the error box.
+       */
+      function hideErrorBox() {
+        $("#error-box").removeClass("visible");
+        $("#error-box").addClass("invisible");
+      }
+
+      /**
        * Clears the monitor ID input box and disables the product type selectors.
        */
       function clearMonitorId() {
@@ -537,65 +596,14 @@
         $("#dailybyhour-button").prop("disabled", true);
         $("#timeseries-button").prop("disabled", true);
       }
-      
+
       /**
-       * Hide the error box.
+       * Resets the style of the plot type buttons so none appear selected.
        */
-      function hideErrorBox() {
-        $("#error-box").removeClass("visible");
-        $("#error-box").addClass("invisible");
+      function resetPlotTypeButtons() {
+        $(".plot-type-button").removeClass("btn-selected");
       }
 
-      /**
-       * Hide the error box when its close button is clicked.
-       */
-      $(".close").on("click", function () {
-        hideErrorBox();
-      });
-
-      // ----- Script start ------------------------------------------------------------------------
-
-      // Service for plot products
-      const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
-      const plotServiceName = "plot";
-
-      // Service for monitor GeoJSON products
-      const dataServicePath = "https://tools.airfire.org/monitor-data/v4/";
-      const geoJsonServiceName = "geojson";
-
-        // Create the Leaflet map centered on the continental US
-      var monitorMap = L.map('leaflet-map', {
-        preferCanvas: false
-      }).setView([39.5, -98.35], 3);
-
-      // Create a canvas layer
-      var mapRenderer = L.canvas({ padding: 0.5 });
-
-      // Create a Stamen tile layer
-      var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
-        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        subdomains: 'abcd',
-        minZoom: 3,
-        maxZoom: 15,
-        ext: 'png'
-      })
-
-      // Create a layer group for all the monitor markers
-      var monitorMarkersLayerGroup = L.layerGroup();
-
-      // Add layers to the map
-      monitorMap.addLayer(tileLayer);
-      monitorMap.addLayer(monitorMarkersLayerGroup);
-
-      // Add monitor markers to the map for the initial date range
-      updateMap();
-
-      // Set the currently selected monitor marker
-      var selectedMonitor = null;
-
-      // Set the currently selected plot type
-      var selectedPlotType = "dailybarplot";
-      $("#dailybarplot-button").addClass("btn-selected");
     });
   </script>
 </body>
