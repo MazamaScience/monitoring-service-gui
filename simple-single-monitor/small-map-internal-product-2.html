@@ -19,7 +19,7 @@
   <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
   
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
@@ -208,13 +208,16 @@
       <div id="plot-type-buttons">
         <label>3) Select product</label>
 
-        <div class="d-flex flex-row flex-wrap">
+        <div class="d-flex flex-row">
           <button id="dailybarplot-button" class="plot-type-button btn btn-primary mr-1" type="button">
             Daily average
           </button>
 
+          <button id="dailybyhour-button" class="plot-type-button btn btn-primary mr-1" type="button">
+            Time of day
+          </button>
 
-          <button id="dailyaveragetable-button" class="plot-type-button btn btn-primary" type="button">
+          <button id="timeseries-button" class="plot-type-button btn btn-primary" type="button">
             Time series
           </button>
         </div>
@@ -712,7 +715,8 @@
       var selectedMonitor = null;
 
       // Set the currently selected plot type
-      var selectedPlotType = "";
+      var selectedPlotType = "dailybarplot";
+      $("#dailybarplot-button").addClass("btn-selected");
     });
   </script>
 </body>
