@@ -86,15 +86,15 @@
 
             <div class='d-flex flex-row mb-2'>
 
-              <button id='dailybarplot-button' class='product-button plot-type-button btn btn-primary mr-1 mb-1' type='button' value='dailybarplot'>
+              <button id="dailybarplot-product-button" class='product-button plot-type-button btn btn-primary mr-1 mb-1' type='button' value='dailybarplot'>
                 Daily average
               </button>
 
-              <button id='dailybyhour-button' class='product-button plot-type-button btn btn-primary mr-1 mb-1' type='button' value='dailybyhour'>
+              <button id="dailybyhour-product-button" class='product-button plot-type-button btn btn-primary mr-1 mb-1' type='button' value='dailybyhour'>
                 Time of day
               </button>
 
-              <button id='timeseries-button' class='product-button plot-type-button btn btn-primary mb-1' type='button' value='timeseries'>
+              <button id="timeseries-product-button" class='product-button plot-type-button btn btn-primary mb-1' type='button' value='timeseries'>
                 Time series
               </button>
 
@@ -110,7 +110,11 @@
 
             <div class='d-flex flex-row mb-2'>
 
-              <button id='report-product-button' class='product-button plot-type-button btn btn-primary' type='button' value='report'>
+              <button id="dailyaveragetable-product-button" class='product-button plot-type-button btn btn-primary mr-1' type='button' value='dailyaveragetable'>
+                Daily Average Table
+              </button>
+
+              <button id="report-product-button" class='product-button plot-type-button btn btn-primary' type='button' value='report'>
                 Report
               </button>
 
@@ -166,8 +170,9 @@
       const plotServicePath = 'https://test-c1.airfire.org/monitor-plot/test/';
       const plotServiceName = 'plot';
 
-      // Service for monitor GeoJSON product
+      // Service for monitor data products
       const dataServicePath = 'https://tools.airfire.org/monitor-data/v4/';
+      const dailyAverageTableServiceName = 'data';
       const geoJsonServiceName = 'geojson';
 
       // Service for monitor report product
@@ -196,7 +201,7 @@
       });
 
       // Highlight the dailybarplot button
-      $('#dailybarplot-button').addClass('btn-selected');
+      $('#dailybarplot-product-button').addClass('btn-selected');
       
       // Create the Leaflet map centered on the continental US
       var monitorMap = L.map('leaflet-map', {
@@ -450,13 +455,15 @@
       // ----- Other Functions -------------------------------------------------
 
       /**
-       * Generates a product using selected page input.
+       * Generates the selected product.
        */
       function generateProduct() {
         if (selectedProductType == 'dailybarplot' ||
           selectedProductType == 'dailybyhour' ||
           selectedProductType == 'timeseries') {
           generatePlotProduct();
+        } else if (selectedProductType == 'dailyaveragetable') {
+          generateDailyAverageTableProduct();
         } else if (selectedProductType == 'report') {
           generateReportProduct();
         }
@@ -493,7 +500,7 @@
       }
 
       /**
-       * Builds a URL request to the plot service API using form input.
+       * Builds a URL request to the plot service using form input.
        */
       function buildPlotRequestUrl() {
         // Gather query params
@@ -544,7 +551,76 @@
       }
 
       /**
-       * Builds a report request and navigates to it in a new tab.
+       * Downloads a generated daily average table CSV.
+       */
+      function generateDailyAverageTableProduct() {
+        $('#page-status-message').text('Generating daily average table...');
+
+        hideErrorBox();
+
+        const tableRequestURL = buildDailyAverageTableRequestUrl();
+        
+        console.log('Daily average table request URL: ' + tableRequestURL);
+        
+        if (tableRequestURL != null) {
+          // Create a temporary download link, programatically click it, and then remove it frome the page
+          var link = document.createElement('a');
+          link.setAttribute('download', '');
+          link.href = tableRequestURL;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          $('#page-status-message').text('Downloaded daily average table.');
+        }
+      }
+
+      /**
+       * Builds a URL request to the daily average table service using form input.
+       */
+      function buildDailyAverageTableRequestUrl() {
+        // Get query params
+        const monitorId = selectedMonitorId;
+        const startDate = dateToYMD(selectedStartDate);
+        const endDate = dateToYMD(selectedEndDate);
+
+        // Build product request query string
+        const queryParams = 
+          "csvtype=human" +
+          "&monitorids=" + monitorId +
+          "&startdate=" + startDate +
+          "&enddate=" + endDate +
+          "&outputfiletype=csv";
+
+        // Build product request URL
+        const productRequestUrl = dataServicePath + dailyAverageTableServiceName + "?" + queryParams;
+
+        // Build product json request URL
+        const jsonRequestUrl = productRequestUrl + "&responsetype=json";
+
+        console.log("Product request URL: " + productRequestUrl);
+    
+        // Request the JSON response first to check for server-side errors
+        fetch(jsonRequestUrl, { mode: 'cors' })
+          .then(response => response.json())
+          .then(data => {
+            console.log(data);
+
+            if (data.status == "error") {
+              handleServerError(data.errors);
+              $("#page-status-message").text("Failed to generate daily average table.");
+              return null;
+            }
+          })
+          .catch(error => {
+            return null;
+          });
+
+        return productRequestUrl;
+      }
+
+      /**
+       * Navigates to a generated monitor report HTML page in a new tab.
        */
       function generateReportProduct() {
         $('#page-status-message').text('Generating report...');
