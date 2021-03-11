@@ -74,29 +74,52 @@
           <input id="monitorId" type="text" class="form-control input-sm" name="monitorId" disabled>
         </div>
 
-        <!-- Plot type input -->
-        <div id="plot-type-buttons">
+        <!-- Product type selection -->
+        <div id="product-types">
 
-          <label>3) Select product</label>
+          <label>3) Select product type</label>
+          
+          <!-- Plot products selection -->
+          <div id="plot-products">
 
-          <div class="d-flex flex-row">
+            <p class="mb-0">Plots</p>
 
-            <button id="dailybarplot-button" class="plot-type-button btn btn-primary mr-1" type="button">
-              Daily average
-            </button>
+            <div class="d-flex flex-row mb-2">
 
-            <button id="dailybyhour-button" class="plot-type-button btn btn-primary mr-1" type="button">
-              Time of day
-            </button>
+              <button id="dailybarplot-button" class="product-button plot-type-button btn btn-primary mr-1 mb-1" type="button" value="dailybarplot">
+                Daily average
+              </button>
 
-            <button id="timeseries-button" class="plot-type-button btn btn-primary" type="button">
-              Time series
-            </button>
+              <button id="dailybyhour-button" class="product-button plot-type-button btn btn-primary mr-1 mb-1" type="button" value="dailybyhour">
+                Time of day
+              </button>
+
+              <button id="timeseries-button" class="product-button plot-type-button btn btn-primary mb-1" type="button" value="timeseries">
+                Time series
+              </button>
+
+            </div>
 
           </div>
+          <!-- END plot-products -->
 
+          <!-- Other products selection -->
+          <div id="other-products">
+            
+            <p class="mb-0">Other</p>
+
+            <div class="d-flex flex-row mb-2">
+
+              <button id="report-product-button" class="product-button plot-type-button btn btn-primary" type="button" value="report">
+                Report
+              </button>
+
+            </div>
+
+          </div>
+          
         </div>
-        <!-- END plot-type-buttons -->
+        <!-- END product-types -->
 
       </div>
       <!-- END inputs-section -->
@@ -109,7 +132,7 @@
 
   </div>
 
- <!-- ==================== RIGHT ========================================== -->
+  <!-- ==================== RIGHT ========================================== -->
 
   <div id="content-area">
 
@@ -139,7 +162,7 @@
 
       // ----- Page State ------------------------------------------------------
 
-       // Service for plot products
+      // Service for plot products
       const plotServicePath = "https://test-c1.airfire.org/monitor-plot/test/";
       const plotServiceName = "plot";
 
@@ -147,22 +170,26 @@
       const dataServicePath = "https://tools.airfire.org/monitor-data/v4/";
       const geoJsonServiceName = "geojson";
 
-      // Set the currently selected monitor marker
-      var selectedMonitor = null;
-
-      // Set the currently selected plot type
-      var selectedPlotType = "dailybarplot";
+      // Track the current page input selections
+      var selectedStartDate = moment().subtract(10, "day").startOf("day").toDate();
+      var selectedEndDate = moment().startOf("day").toDate();
+      var selectedMonitorId = "";
+      var selectedMonitorMarker = null;
+      var selectedProductType = "dailybarplot";
       
       // ----- Initialize Page -------------------------------------------------
 
-      // Create the DateRangerPicker
+      // Create the DateRangePicker
       $("input[name=daterange]").daterangepicker({
-        startDate: moment().subtract(10, "day").startOf("day").toDate(),
-        endDate: moment().startOf("day").toDate(),
+        startDate: selectedStartDate,
+        endDate: selectedEndDate,
         minDate: "01/01/1998",
-        maxDate: moment().startOf("day").toDate(),
+        maxDate: selectedStartDate,
         opens: "left"
-      }, function(start, end, label) {});
+      }, function(start, end, label) {
+        selectedStartDate = start;
+        selectedEndDate = end;
+      });
 
       // Highlight the dailybarplot button
       $("#dailybarplot-button").addClass("btn-selected");
@@ -204,47 +231,19 @@
       });
 
       /**
-       * Update the map on button click.
+       * Update the map when the 'update map' button click.
        */
       $("#update-map-button").click(function() {
         updateMap();
       });
 
-      /**
-       * Generate a "dailybarplot" plot on button click.
-       */
-      $("#dailybarplot-button").click(function() {
-        // Generate plot
-        selectedPlotType = "dailybarplot";
-        generatePlot();
+      // Generate a product when a product button is clicked
+      $(".product-button").click(function() {
+        selectedProductType = $(this).attr("value");
 
-        // Highlight this button
-        resetPlotTypeButtons();
-        $(this).addClass("btn-selected");
-      });
+        generateProduct();
 
-      /**
-       * Generate a "dailybyhour" plot on button click.
-       */
-      $("#dailybyhour-button").click(function() {
-        // Generate plot
-        selectedPlotType = "dailybyhour";
-        generatePlot();
-
-        // Highlight this button
-        resetPlotTypeButtons();
-        $(this).addClass("btn-selected");
-      });
-
-      /**
-       * Generate a "timeseries" plot on button click.
-       */
-      $("#timeseries-button").click(function() {
-        // Generate plot
-        selectedPlotType = "timeseries";
-        generatePlot();
-
-        // Highlight this button
+        // Highlight this button and deselect others
         resetPlotTypeButtons();
         $(this).addClass("btn-selected");
       });
@@ -299,9 +298,9 @@
         // Update the date range label for the map
         const dateRange = $("input[name=daterange]").val().split(" - ");
 
-        // Convert format of input date range
-        const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYY-MM-DD'); 
-        const endDate = moment(dateRange[1], "MM/DD/YYYY").format('YYYY-MM-DD');
+        // Format the selected date range
+        const startDate = moment(selectedStartDate, "MM/DD/YYYY").format('YYYY-MM-DD'); 
+        const endDate = moment(selectedEndDate, "MM/DD/YYYY").format('YYYY-MM-DD');
 
         // Update the map date range label
         $("#map-date-range").text("Monitors with data " + startDate + " to " + endDate);
@@ -370,23 +369,23 @@
        * @param layer  default marker layer provided for the monitorFeature (ignored)
        */
       function createMonitorMarker(monitorFeature, layer) {
-        // Skip if the feature doesn't have a monitor ID
-        if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) {
-          return;
-        }
+        // Abort if the feature doesn't have a monitor ID
+        if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) return;
 
         // Get monitor ID and site name
         const monitorId = monitorFeature.properties.monitorID;
         const siteName = monitorFeature.properties.siteName;
-        const dataSource = monitorFeature.properties.dataSource;
-        const shape = (dataSource.includes("AIRNOW") || dataSource.includes("EPA"))
-          ? "circle"
-          : "triangle";
 
         // Get monitor coordinates
         const coords = monitorFeature.geometry.coordinates;
         const lon = coords[0];
         const lat = coords[1];
+
+        // Determine marker shape
+        const dataSource = monitorFeature.properties.dataSource;
+        const shape = (dataSource.includes("AIRNOW") || dataSource.includes("EPA"))
+          ? "circle"
+          : "triangle";
 
         // Create a marker for the monitor
         var monitorMarker = L.shapeMarker([lat, lon], {
@@ -414,35 +413,33 @@
 
         // React when the marker is clicked
         monitorMarker.on('click', function(e) {
-          // Focus on and populate the monitor ID input field
-          $("#monitorId").focus();
-          $("#monitorId").val(monitorId);
-
-          // Un-highlight the previously selected monitor marker
-          if (selectedMonitor != null) {
-            selectedMonitor.setStyle({
+          // Un-highlight the previously selected marker
+          if (selectedMonitorMarker != null) {
+            selectedMonitorMarker.setStyle({
               color: "#0037aa",
               fillColor: "#007bff",
               weight: 1.6
             });
           } 
 
-          selectedMonitor = monitorMarker;
+          // Update the selected monitor
+          selectedMonitorMarker = monitorMarker;
+          selectedMonitorId = monitorId;
 
-          // Highlight the newly selected monitor
-          selectedMonitor.setStyle({
+          // Highlight the selected monitor marker
+          selectedMonitorMarker.bringToFront();
+          selectedMonitorMarker.setStyle({
             color: "#000000",
             weight: 4
           });
 
-          selectedMonitor.bringToFront();
+          // Update the monitor ID input field
+          $("#monitorId").val(monitorId);
 
-              // Enable the product type selectors
-          $("#dailybarplot-button").prop("disabled", false);
-          $("#dailybyhour-button").prop("disabled", false);
-          $("#timeseries-button").prop("disabled", false);
+          // Enable the product type selectors
+          $(".product-button").prop("disabled", false);
 
-          generatePlot();
+          generateProduct();
         });
 
         // Add the marker to the markers layer
@@ -450,6 +447,23 @@
       }
 
       // ----- Other Functions -------------------------------------------------
+
+      function generateProduct() {
+
+        if (selectedProductType == "dailybarplot" ||
+          selectedProductType == "dailybyhour" ||
+          selectedProductType == "timeseries") {
+
+          generatePlot();
+
+        } else if (selectedProductType == "report") {
+
+          alert("Will generate a report");
+          //generateReport();
+
+        }
+
+      }
 
       /**
        * Builds a plot request and sets the plot image to the resulting URL.
@@ -482,33 +496,35 @@
       }
 
       /**
-           * Builds a URL request to the plot service API using form input.
-           */
+       * Builds a URL request to the plot service API using form input.
+       */
       function buildPlotRequestURL() {
-        // Get form input
-        const dateRange = $("input[name=daterange]").val().split(" - ");
-        const monitorId = $("#monitorId").val();
-        const plotType = selectedPlotType;
+        // Gather query params
+        const startDate = dateToYMD(selectedStartDate);
+        const endDate   = dateToYMD(selectedEndDate);
+        const monitorId = selectedMonitorId;
+        const plotType = selectedProductType;
 
-        if (dateRange.length == 0 || monitorId.length == 0 || plotType.length == 0) return null;
-
-        // Convert format of input date range
-        const startDate = moment(dateRange[0], "MM/DD/YYYY").format('YYYYMMDD');
-        const endDate   = moment(dateRange[1], "MM/DD/YYYY").format('YYYYMMDD');
+        // Abort if any required params aren't set
+        if (startDate.length == 0 ||
+          endDate.length == 0 ||
+          monitorId.length == 0 ||
+          plotType.length == 0)
+          return null;
         
-        // Build plot request query string
+        // Build query string
         const queryParams = 
           "databaseversion=4.0" +
-            "&webserviceapi=4.0" + 
+          "&webserviceapi=4.0" + 
           "&plottype="  + plotType +
           "&monitorid=" + monitorId +
           "&startdate=" + startDate +
           "&enddate="   + endDate;
 
-        // Build full plot image request URL
+        // Build plot image request URL
         const plotRequestURL = plotServicePath + plotServiceName + "?" + queryParams;
         
-        // Build plot json request URL
+        // Build plot JSON request URL
         const jsonRequestURL = plotRequestURL + "&responsetype=json";
         
         // Request the JSON response first to check for server-side errors
@@ -518,9 +534,9 @@
             console.log(data);
 
             if (data.status == "error") {
-                handleServerError(data.errors);
-                return null;
-              }
+              handleServerError(data.errors);
+              return null;
+            }
           })
           .catch(error => {
             return null;
@@ -592,10 +608,12 @@
         // Clear the the monitor input box
         $("#monitorId").val("");
 
+        $(".product-button").prop("disabled", true);
+
         // Disable the product type selectors
-        $("#dailybarplot-button").prop("disabled", true);
-        $("#dailybyhour-button").prop("disabled", true);
-        $("#timeseries-button").prop("disabled", true);
+        //$("#dailybarplot-button").prop("disabled", true);
+        //$("#dailybyhour-button").prop("disabled", true);
+        //$("#timeseries-button").prop("disabled", true);
       }
 
       /**
@@ -603,6 +621,14 @@
        */
       function resetPlotTypeButtons() {
         $(".plot-type-button").removeClass("btn-selected");
+      }
+
+      /**
+       * Converts a Date to its YYYYMMDD format
+       * @param date  the date to convert
+       */
+      function dateToYMD(date) {
+        return moment(date, "MM/DD/YYYY").format('YYYYMMDD');
       }
 
     });
