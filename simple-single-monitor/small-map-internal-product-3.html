@@ -214,7 +214,7 @@
         startDate: selectedStartDate,
         endDate: selectedEndDate,
         minDate: '01/01/1998',
-        maxDate: selectedStartDate,
+        maxDate: selectedEndDate,
         opens: 'left'
       }, function(start, end, label) {
         selectedStartDate = start;
@@ -265,7 +265,6 @@
        */
       $('input[name=daterange]').change(function() {
         $('#update-map-button').prop('disabled', false);
-
         generateProduct();
       });
 
