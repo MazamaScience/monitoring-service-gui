@@ -92,8 +92,14 @@
                 <p class='mb-0'>Plots:</p>
 
                 <div id="plot-type-list" class="form-group">
+
                   <div class="form-check">
-                    <input class="form-check-input" type="radio" name="plot-type" value="dailybarplot" checked>
+                    <input class="form-check-input" type="radio" name="plot-type" value="" checked>
+                    <label class="form-check-label">None</label>
+                  </div>
+
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="plot-type" value="dailybarplot">
                     <label class="form-check-label">Daily average</label>
                   </div>
 
@@ -106,6 +112,7 @@
                     <input class="form-check-input" type="radio" name="plot-type" value="timeseries">
                     <label class="form-check-label">Time series</label>
                   </div>
+
                 </div>
 
             </div>
@@ -216,7 +223,7 @@
       var selectedEndDate = moment().startOf('day').toDate();
       var selectedMonitorId = '';
       var selectedMonitorMarker = null;
-      var selectedProductType = 'dailybarplot';
+      var selectedProductType = '';
       
       // ----- Initialize Page -------------------------------------------------
 
@@ -490,25 +497,26 @@
        * Builds a plot request and sets the plot image to the resulting URL.
        */
       function generatePlotProduct() {
-        $('#page-status-message').text('Generating plot...');
-
         hideErrorBox();
 
         const plotRequestUrl = buildPlotRequestUrl();
         
         console.log('Plot request URL: ' + plotRequestUrl);
+
+        // Hide plot image
+        $('#plot-image').removeClass('visible');
+        $('#plot-image').addClass('invisible');
+
+        // Show plot placeholder
+        $('#plot-placeholder').removeClass('invisible');
+        $('#plot-placeholder').addClass('visible');
+
         
         if (plotRequestUrl != null) {
+          $('#page-status-message').text('Generating plot...');
+
           // Update plot image source
           $('#plot-image').attr('src', plotRequestUrl);
-
-          // Hide plot image
-          $('#plot-image').removeClass('visible');
-          $('#plot-image').addClass('invisible');
-
-          // Show plot placeholder
-          $('#plot-placeholder').removeClass('invisible');
-          $('#plot-placeholder').addClass('visible');
 
           // Show loading spinner
           $('#loading-spinner').removeClass('invisible');
