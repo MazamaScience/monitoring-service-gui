@@ -27,6 +27,9 @@
           crossorigin='anonymous'></script>
   <script src='leaflet-svg-shape-markers.min.js'></script>
 
+  <script src="https://kit.fontawesome.com/0bbc9a87ac.js"
+          crossorigin="anonymous"></script>
+
   <!-- CSS -->
   <link rel='stylesheet'
         href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css'
@@ -110,13 +113,15 @@
 
             <div class='d-flex flex-row mb-2'>
 
-              <button id="dailyaveragetable-product-button" class='product-button plot-type-button btn btn-primary mr-1' type='button' value='dailyaveragetable'>
-                Daily Average Table
-              </button>
+              <a id="dailyaveragetable-product-link" class="mr-4 disabled" href="#">
+                Daily average table
+                <i class="fas fa-download"></i>
+              </a>
 
-              <button id="report-product-button" class='product-button plot-type-button btn btn-primary' type='button' value='report'>
-                Report
-              </button>
+              <a id="report-product-link" href="#">
+                Monitor report
+                <i class="fas fa-external-link-alt"></i>
+              </a>
 
             </div>
 
@@ -257,6 +262,15 @@
         // Highlight this button and deselect others
         unhighlightProductButtons();
         $(this).addClass('btn-selected');
+      });
+
+      $('#dailyaveragetable-product-link').click(function() {
+        generateDailyAverageTableProduct();
+      });
+
+
+      $('#report-product-link').click(function() {
+        generateReportProduct();
       });
 
       /**
