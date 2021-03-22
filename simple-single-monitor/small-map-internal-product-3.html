@@ -126,14 +126,14 @@
               <div>
 
                 <div>
-                  <a id="dailyaveragetable-product-link" class="mr-4 disabled" href="#">
+                  <a id="dailyaveragetable-product-link" class="other-product-link mr-4" href="#">
                     <i class="fas fa-download"></i>
                     Daily average table
                   </a>
                 </div>
                 
                 <div>
-                  <a id="report-product-link" href="#">
+                  <a id="report-product-link" class="other-product-link" href="#">
                     <i class="fas fa-external-link-alt"></i>
                     Monitor report
                   </a>
@@ -483,6 +483,7 @@
 
           // Enable the product type selectors
           $('.form-check-input').prop('disabled', false);
+          $('.other-product-link').removeClass('disabled');
 
           generatePlotProduct();
         });
@@ -752,6 +753,7 @@
 
         // Disable all product buttons
         $('.form-check-input').prop('disabled', true);
+        $('.other-product-link').addClass('disabled');
       }
 
       /**
