@@ -133,12 +133,12 @@
       </div>
       <!-- END inputs-section -->
 
-      <p id='map-date-range' class='mb-1'></p>
+      <p id='page-status-message' class="mb-1"></p>
 
-      <div id='leaflet-map' class='mb-3'></div>
+      <div id='leaflet-map' class='mb-2 rounded'></div>
 
-      <p id='page-status-message'></p>
-
+      <p id='map-date-range' class='mb-0'></p>
+      
   </div>
 
   <!-- ==================== RIGHT ========================================== -->
@@ -277,7 +277,7 @@
        * React when the plot image loads.
        */
       document.getElementById('plot-image').onload = function() {
-        $('#page-status-message').text('Finished generating plot');
+        $('#page-status-message').text('');
 
         // Hide loading spinner
         $('#loading-spinner').removeClass('visible');
@@ -375,7 +375,7 @@
                 onEachFeature: createMonitorMarker
             });
 
-            $('#page-status-message').text('Finished updating map');
+            $('#page-status-message').text('');
           })
           .catch(error => {
             return null;
@@ -585,7 +585,7 @@
           link.click();
           link.remove();
 
-          $('#page-status-message').text('Downloaded daily average table.');
+          $('#page-status-message').text('');
         }
       }
 
@@ -600,19 +600,19 @@
 
         // Build product request query string
         const queryParams = 
-          "csvtype=human" +
-          "&monitorids=" + monitorId +
-          "&startdate=" + startDate +
-          "&enddate=" + endDate +
-          "&outputfiletype=csv";
+          'csvtype=human' +
+          '&monitorids=' + monitorId +
+          '&startdate=' + startDate +
+          '&enddate=' + endDate +
+          '&outputfiletype=csv';
 
         // Build product request URL
-        const productRequestUrl = dataServicePath + dailyAverageTableServiceName + "?" + queryParams;
+        const productRequestUrl = dataServicePath + dailyAverageTableServiceName + '?' + queryParams;
 
         // Build product json request URL
-        const jsonRequestUrl = productRequestUrl + "&responsetype=json";
+        const jsonRequestUrl = productRequestUrl + '&responsetype=json';
 
-        console.log("Product request URL: " + productRequestUrl);
+        console.log('Product request URL: ' + productRequestUrl);
     
         // Request the JSON response first to check for server-side errors
         fetch(jsonRequestUrl, { mode: 'cors' })
@@ -622,7 +622,7 @@
 
             if (data.status == "error") {
               handleServerError(data.errors);
-              $("#page-status-message").text("Failed to generate daily average table.");
+              $("#page-status-message").text('');
               return null;
             }
           })
