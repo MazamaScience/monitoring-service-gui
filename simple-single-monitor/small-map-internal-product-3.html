@@ -264,6 +264,8 @@
        * Generate a product when the date range is changed.
        */
       $('input[name=daterange]').change(function() {
+        $('#update-map-button').prop('disabled', false);
+
         generateProduct();
       });
 
@@ -324,6 +326,8 @@
        */
       function updateMap() {
         $('#page-status-message').text('Updating map...');
+
+        $('#update-map-button').prop('disabled', true);
 
         // Remove all the markers from the map
         monitorMarkersLayerGroup.clearLayers();
