@@ -38,23 +38,12 @@ label {
   margin-bottom: 2px;
 }
 
+label.form-check-label {
+  font-weight: normal;
+}
+
 #daterange, #monitorId {
   width: 220px;
-}
-
-.btn-selected {
-  background-color: #5cb85c;
-  border: 1px solid #5cb85c;
-}
-
-.btn-selected:disabled {
-  background-color: #4ba74b;
-  border: 1px solid #4ba74b;
-}
-
-.btn-selected:focus {
-  background-color: #4ba74b;
-  border: 1px solid #4ba74b;
 }
 
 #map-date-range {
@@ -75,6 +64,7 @@ label {
   font-size: 12px;
   font-style: italic;
   margin-bottom: 0px;
+  color: gray;
 }
 
 #content-area {

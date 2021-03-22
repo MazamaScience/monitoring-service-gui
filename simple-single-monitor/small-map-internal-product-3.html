@@ -53,8 +53,10 @@
   <div id='toolbar' class='pb-1'>
     <!-- page title -->
     <div>
-      <h1>Single-Monitor Plots</h1>
+      <h1 class="mb-0">Single-Monitor Plots</h1>
     </div>
+
+    <hr class="w-100">
 
     <!-- Inputs -->
       <div id='inputs-section'>
@@ -81,54 +83,63 @@
         <div id='product-types'>
 
           <label>3) Showing</label>
-          
-          <!-- Plot products selection -->
-          <div id='plot-products'>
 
-            <p class='mb-0'>Plots</p>
-
-            <div class='d-flex flex-row mb-2'>
-
-              <button id="dailybarplot-product-button" class='product-button plot-type-button btn btn-primary mr-1 mb-1' type='button' value='dailybarplot'>
-                Daily average
-              </button>
-
-              <button id="dailybyhour-product-button" class='product-button plot-type-button btn btn-primary mr-1 mb-1' type='button' value='dailybyhour'>
-                Time of day
-              </button>
-
-              <button id="timeseries-product-button" class='product-button plot-type-button btn btn-primary mb-1' type='button' value='timeseries'>
-                Time series
-              </button>
-
-            </div>
-
-          </div>
-          <!-- END plot-products -->
-
-          <!-- Other products selection -->
-          <div id='other-products'>
+          <div class="d-flex justify-content-between">
             
-            <p class='mb-0'>Other products</p>
+            <!-- Plot products selection -->
+            <div id='plot-products'>
 
-            <div class='d-flex flex-row mb-2'>
+                <p class='mb-0'>Plots:</p>
 
-              <a id="dailyaveragetable-product-link" class="mr-4 disabled" href="#">
-                Daily average table
-                <i class="fas fa-download"></i>
-              </a>
+                <div id="plot-type-list" class="form-group">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="plot-type" value="dailybarplot" checked>
+                    <label class="form-check-label">Daily average</label>
+                  </div>
 
-              <a id="report-product-link" href="#">
-                Monitor report
-                <i class="fas fa-external-link-alt"></i>
-              </a>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="plot-type" value="dailybyhour">
+                    <label class="form-check-label">Time of day</label>
+                  </div>
+
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="plot-type" value="timeseries">
+                    <label class="form-check-label">Time series</label>
+                  </div>
+                </div>
 
             </div>
+            <!-- END plot-products -->
 
+            <!-- Other products selection -->
+            <div id='other-products'>
+              
+              <p class='mb-0'>Other products:</p>
+
+              <div>
+
+                <div>
+                  <a id="dailyaveragetable-product-link" class="mr-4 disabled" href="#">
+                    <i class="fas fa-download"></i>
+                    Daily average table
+                  </a>
+                </div>
+                
+                <div>
+                  <a id="report-product-link" href="#">
+                    <i class="fas fa-external-link-alt"></i>
+                    Monitor report
+                  </a>
+                </div>          
+
+              </div>
+
+            </div>
+            
           </div>
-          
+          <!-- END product-types -->
+
         </div>
-        <!-- END product-types -->
 
       </div>
       <!-- END inputs-section -->
@@ -220,9 +231,6 @@
         selectedStartDate = start;
         selectedEndDate = end;
       });
-
-      // Highlight the dailybarplot button
-      $('#dailybarplot-product-button').addClass('btn-selected');
       
       // Create the Leaflet map centered on the continental US
       var monitorMap = L.map('leaflet-map', {
@@ -265,26 +273,17 @@
        */
       $('input[name=daterange]').change(function() {
         $('#update-map-button').prop('disabled', false);
-        generateProduct();
+        generatePlotProduct();
       });
 
-      /**
-       * Generate a product when a product button is clicked.
-       */
-      $('.product-button').click(function() {
-        selectedProductType = $(this).attr('value');
-
-        generateProduct();
-
-        // Highlight this button and deselect others
-        unhighlightProductButtons();
-        $(this).addClass('btn-selected');
+      $("input[type=radio][name=plot-type]").click(function() {
+        selectedProductType = $("input[name=plot-type]:checked").val();
+        generatePlotProduct();
       });
 
       $('#dailyaveragetable-product-link').click(function() {
         generateDailyAverageTableProduct();
       });
-
 
       $('#report-product-link').click(function() {
         generateReportProduct();
@@ -476,9 +475,9 @@
           $('#monitorId').val(monitorId);
 
           // Enable the product type selectors
-          $('.product-button').prop('disabled', false);
+          $('.form-check-input').prop('disabled', false);
 
-          generateProduct();
+          generatePlotProduct();
         });
 
         // Add the marker to the markers layer
@@ -486,21 +485,6 @@
       }
 
       // ----- Other Functions -------------------------------------------------
-
-      /**
-       * Generates the selected product.
-       */
-      function generateProduct() {
-        if (selectedProductType == 'dailybarplot' ||
-          selectedProductType == 'dailybyhour' ||
-          selectedProductType == 'timeseries') {
-          generatePlotProduct();
-        } else if (selectedProductType == 'dailyaveragetable') {
-          generateDailyAverageTableProduct();
-        } else if (selectedProductType == 'report') {
-          generateReportProduct();
-        }
-      }
 
       /**
        * Builds a plot request and sets the plot image to the resulting URL.
@@ -666,6 +650,7 @@
         
         if (reportRequestURL != null) {
           window.open(reportRequestURL, '_blank');
+          $('#page-status-message').text('');
         }
       }
 
@@ -758,14 +743,7 @@
         $('#monitorId').val('');
 
         // Disable all product buttons
-        $('.product-button').prop('disabled', true);
-      }
-
-      /**
-       * Unhighlights all product buttons.
-       */
-      function unhighlightProductButtons() {
-        $('.product-button').removeClass('btn-selected');
+        $('.form-check-input').prop('disabled', true);
       }
 
       /**
