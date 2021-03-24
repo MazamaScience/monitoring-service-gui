@@ -28,7 +28,6 @@ h1 {
 
 #inputs-section {
   width: 100%;
-  margin-bottom: 25px;
   display: flex;
   flex-direction: column;
 }
@@ -55,13 +54,21 @@ a.disabled {
   width: 220px;
 }
 
-#map-date-range {
-  font-size: 14px;
+#monitor-map {
+  width: 100%;
+  height: 300px;
 }
 
-#leaflet-map {
-  width: 100%;
-  height: 100%;
+#map-date-range {
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+  color: gray;
+}
+
+#page-status-message {
+  color: gray;
+  font-style: italic;
 }
 
 .sponsor img {

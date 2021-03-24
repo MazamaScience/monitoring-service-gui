@@ -50,10 +50,13 @@
 
   <!-- ==================== LEFT =========================================== -->
 
-  <div id='toolbar' class='pb-1'>
-    <!-- page title -->
+  <div id='toolbar' class="d-felx flex-column justify-content-between pb-2">
+
+    <div class="w-100">
+      
+<!-- page title -->
     <div>
-      <h1 class="mb-0">Single-Monitor Plots</h1>
+      <h1 class="mb-0">Single-Monitor Products</h1>
     </div>
 
     <hr class="w-100">
@@ -62,7 +65,7 @@
       <div id='inputs-section'>
 
         <!-- Time range input -->
-        <div class='d-flex align-items-end mb-3'>
+        <div class='d-flex align-items-end mb-4'>
           <div class='form-group text-input mr-2 mb-0'>
             <label>1) Select date range</label>
             <input id='daterange' type='text' class='form-control input-sm' name='daterange' value=''/>
@@ -74,9 +77,10 @@
         </div>
 
         <!-- Monitor ID input -->
-        <div class='form-group text-input'>
+        <div class='form-group text-input mb-4'>
           <label>2) Select monitor on map</label>
-          <input id='monitorId' type='text' class='form-control input-sm' name='monitorId' disabled>
+          <div id='monitor-map' class='mb-0 rounded'></div>
+           <p id='map-date-range' class='mb-0'></p>
         </div>
 
         <!-- Product type selection -->
@@ -141,19 +145,20 @@
           </div>
           <!-- END product-types -->
 
+          <p id='page-status-message'></p>     
+
         </div>
 
       </div>
       <!-- END inputs-section -->
 
-      <p id='page-status-message' class="mb-1"></p>
+    </div>
 
-      <div id='leaflet-map' class='mb-0 rounded'></div>
+    
 
-      <p id='map-date-range' class='mb-0'></p>
-
+    <div class="w-100">
       <hr class="w-100">
-
+      
       <div id="" class="d-flex justify-content-between w-100">
 
         <div class="sponsor d-flex flex-column align-items-center">
@@ -167,6 +172,8 @@
         </div>
 
       </div>
+
+    </div>
       
   </div>
 
@@ -235,7 +242,7 @@
       });
       
       // Create the Leaflet map centered on the continental US
-      var monitorMap = L.map('leaflet-map', {
+      var monitorMap = L.map('monitor-map', {
         preferCanvas: false
       }).setView([39.5, -98.35], 3);
 
@@ -345,7 +352,7 @@
         const endDate = moment(selectedEndDate, 'MM/DD/YYYY').format('YYYY-MM-DD');
 
         // Update the map date range label
-        $('#map-date-range').text('Monitors with data ' + startDate + ' to ' + endDate);
+        $('#map-date-range').text('Monitors with data from ' + startDate + ' to ' + endDate);
 
         // Hide plot image
         $('#plot-image').removeClass('visible');
@@ -355,7 +362,7 @@
         $('#plot-placeholder').removeClass('invisible');
         $('#plot-placeholder').addClass('visible');
 
-        clearMonitorId();
+        disableProductButtons();
       }
 
       /**
@@ -472,9 +479,6 @@
             color: '#000000',
             weight: 4
           });
-
-          // Update the monitor ID input field
-          $('#monitorId').val(monitorId);
 
           // Enable the product type selectors
           $('.form-check-input').prop('disabled', false);
@@ -705,7 +709,7 @@
 
         // Test if the server error string matches a pattern. If so, generate the corresponding error box message
         if (nonexistantMonitorIDPattern.test(stringifiedError)) {
-          errorBoxMessage = 'Could not find monitor with ID: "' + $('#monitorId').val() + '".';
+          errorBoxMessage = 'Could not find monitor with ID: "' + selectedMonitorId + '".';
         } else if (multiYearDateRangePattern.test(stringifiedError)) {
           errorBoxMessage = 'Date range cannot span multiple years.';
         } else if (noReadingsInDateRangePattern1.test(stringifiedError) ||
@@ -742,13 +746,9 @@
       }
 
       /**
-       * Clears the monitor ID textbox and disables the product buttons.
+       * Disables all product buttons.
        */
-      function clearMonitorId() {
-        // Clear the monitor ID textbox
-        $('#monitorId').val('');
-
-        // Disable all product buttons
+      function disableProductButtons() {
         $('.form-check-input').prop('disabled', true);
         $('.other-product-link').addClass('disabled');
       }
