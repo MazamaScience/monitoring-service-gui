@@ -94,12 +94,7 @@
                 <div id="plot-type-list" class="form-group">
 
                   <div class="form-check">
-                    <input class="form-check-input" type="radio" name="plot-type" value="" checked>
-                    <label class="form-check-label">None</label>
-                  </div>
-
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="plot-type" value="dailybarplot">
+                    <input class="form-check-input" type="radio" name="plot-type" value="dailybarplot" checked>
                     <label class="form-check-label">Daily average</label>
                   </div>
 
@@ -223,7 +218,7 @@
       var selectedEndDate = moment().startOf('day').toDate();
       var selectedMonitorId = '';
       var selectedMonitorMarker = null;
-      var selectedProductType = '';
+      var selectedProductType = 'dailybarplot';
       
       // ----- Initialize Page -------------------------------------------------
 
@@ -483,8 +478,7 @@
 
           // Enable the product type selectors
           $('.form-check-input').prop('disabled', false);
-          $('.other-product-link').remove
-          Class('disabled');
+          $('.other-product-link').removeClass('disabled');
 
           generatePlotProduct();
         });
@@ -535,6 +529,8 @@
         const endDate   = dateToYMD(selectedEndDate);
         const monitorId = selectedMonitorId;
         const plotType = selectedProductType;
+
+        console.log(startDate);
 
         // Abort if any required params aren't set
         if (startDate.length == 0 ||
