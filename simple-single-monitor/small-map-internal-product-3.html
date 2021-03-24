@@ -125,16 +125,16 @@
               <div>
 
                 <div>
-                  <a id="dailyaveragetable-product-link" class="other-product-link mr-4" href="#">
+                  <a id="rawdata-product-link" class="other-product-link mr-4" href="#">
                     <i class="fas fa-download"></i>
-                    CSV data
+                    Raw data CSV
                   </a>
                 </div>
                 
                 <div>
-                  <a id="report-product-link" class="other-product-link" href="#">
+                  <a id="datareport-product-link" class="other-product-link" href="#">
                     <i class="fas fa-external-link-alt"></i>
-                    Monitor report
+                    Data report
                   </a>
                 </div>          
 
@@ -215,12 +215,12 @@
 
       // Service for monitor data products
       const dataServicePath = 'https://tools.airfire.org/monitor-data/v4/';
-      const dailyAverageTableServiceName = 'data';
+      const rawDataServiceName = 'data';
       const geoJsonServiceName = 'geojson';
 
-      // Service for monitor report product
-      const reportServicePath = 'https://tools.airfire.org/monitor-data-report/v4/';
-      const reportServiceName = 'report';
+      // Service for monitor data report product
+      const dataReportServicePath = 'https://tools.airfire.org/monitor-data-report/v4/';
+      const dataReportServiceName = 'report';
 
       // Track the current page input selections
       var selectedStartDate = moment().subtract(10, 'day').startOf('day').toDate();
@@ -292,12 +292,12 @@
         generatePlotProduct();
       });
 
-      $('#dailyaveragetable-product-link').click(function() {
-        generateDailyAverageTableProduct();
+      $('#rawdata-product-link').click(function() {
+        generateRawDataProduct();
       });
 
-      $('#report-product-link').click(function() {
-        generateReportProduct();
+      $('#datareport-product-link').click(function() {
+        generateDataReportProduct();
       });
 
       /**
@@ -582,12 +582,12 @@
       /**
        * Downloads a generated daily average table CSV.
        */
-      function generateDailyAverageTableProduct() {
+      function generateRawDataProduct() {
         $('#page-status-message').text('Generating daily average table...');
 
         hideErrorBox();
 
-        const tableRequestURL = buildDailyAverageTableRequestUrl();
+        const tableRequestURL = buildRawDataRequestUrl();
         
         console.log('Daily average table request URL: ' + tableRequestURL);
         
@@ -607,7 +607,7 @@
       /**
        * Builds a URL request to the daily average table service using form input.
        */
-      function buildDailyAverageTableRequestUrl() {
+      function buildRawDataRequestUrl() {
         // Get query params
         const monitorId = selectedMonitorId;
         const startDate = dateToYMD(selectedStartDate);
@@ -622,7 +622,7 @@
           '&outputfiletype=csv';
 
         // Build product request URL
-        const productRequestUrl = dataServicePath + dailyAverageTableServiceName + '?' + queryParams;
+        const productRequestUrl = dataServicePath + rawDataServiceName + '?' + queryParams;
 
         // Build product json request URL
         const jsonRequestUrl = productRequestUrl + '&responsetype=json';
@@ -649,24 +649,24 @@
       }
 
       /**
-       * Navigates to a generated monitor report HTML page in a new tab.
+       * Navigates to a generated monitor data report HTML page in a new tab.
        */
-      function generateReportProduct() {
+      function generateDataReportProduct() {
         $('#page-status-message').text('Generating report...');
 
         hideErrorBox();
 
-        const reportRequestURL = buildReportRequestUrl();
+        const dataReportRequestURL = buildDataReportRequestUrl();
         
-        console.log('Report request URL: ' + reportRequestURL);
+        console.log('Data report request URL: ' + dataReportRequestURL);
         
-        if (reportRequestURL != null) {
-          window.open(reportRequestURL, '_blank');
+        if (dataReportRequestURL != null) {
+          window.open(dataReportRequestURL, '_blank');
           $('#page-status-message').text('');
         }
       }
 
-      function buildReportRequestUrl() {
+      function buildDataReportRequestUrl() {
         // Gather query params
         const startDate = dateToYMD(selectedStartDate);
         const endDate   = dateToYMD(selectedEndDate);
@@ -686,10 +686,10 @@
           '&startdate=' + startDate +
           '&enddate='   + endDate;
 
-        // Build report request URL
-        const reportRequestUrl = reportServicePath + reportServiceName + '?' + queryParams;
+        // Build data report request URL
+        const dataReportRequestUrl = dataReportServicePath + dataReportServiceName + '?' + queryParams;
         
-        return reportRequestUrl;
+        return dataReportRequestUrl;
       }
 
       /**
