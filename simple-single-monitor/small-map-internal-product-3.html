@@ -679,32 +679,36 @@
           ? unitIdMatches[1]
           : '';
 
-        // Determine whether to use the AIRSIS or WRCC service
-        let qaqcReportServiceName = '';
-        if (dataSource === 'AIRSIS') {
-          qaqcReportServiceName = airsisQaqcReportServiceName;
-        } else if (dataSource === 'WRCC') {
-          qaqcReportServiceName = wrccQaqcReportServiceName;
-        } else {
-          return null;
-        }
-
-        // Abort if any required params aren't set
+        // Abort if any required params for both services aren't set
         if (startDate.length == 0 ||
           endDate.length == 0 ||
           unitId == null ||
           unitId.length == 0)
           return null;
         
-        // Build query string
-        const queryParams = 
+        // Build query string for both services
+        let queryParams = 
           'databaseversion=4.0' +
           '&webserviceapi=4.0' + 
           '&unitid=' + unitId +
           '&startdate=' + startDate +
           '&enddate='   + endDate;
 
-        // Build data report request URL
+        // Determine whether to use the AIRSIS or WRCC service
+        let qaqcReportServiceName = '';
+        if (dataSource === 'AIRSIS') {
+          qaqcReportServiceName = airsisQaqcReportServiceName;
+          
+          let provider = 'usfs'; // TODO: extract provider from instrumentId
+          if (provider == null || provider.length == 0) return null; 
+          queryParams += '&provider=' + provider;
+        } else if (dataSource === 'WRCC') {
+          qaqcReportServiceName = wrccQaqcReportServiceName;
+        } else {
+          return null;
+        }
+
+        // Build QA/QC report request URL
         const qaqcReportRequestURL = qaqcReportServicePath + qaqcReportServiceName + '?' + queryParams;
         
         return qaqcReportRequestURL;
