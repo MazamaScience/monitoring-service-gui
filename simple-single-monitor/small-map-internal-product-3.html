@@ -254,6 +254,9 @@
         selectedStartDate = start;
         selectedEndDate = end;
       });
+
+      // Hide the QA/QC report product link by default
+      $('#qaqcreport-product-link').hide();
       
       // Create the Leaflet map centered on the continental US
       var monitorMap = L.map('monitor-map', {
@@ -502,6 +505,15 @@
           $('.form-check-input').prop('disabled', false);
           $('.other-product-link').removeClass('disabled');
 
+          console.log(selectedMonitorProperties.dataSource);
+
+          if (selectedMonitorProperties.dataSource.includes('AIRNOW') ||
+            selectedMonitorProperties.dataSource.includes('EPA')) {
+            $('#qaqcreport-product-link').hide();
+          } else {
+            $('#qaqcreport-product-link').show();
+          }
+
           generatePlotProduct();
         });
 
@@ -637,10 +649,6 @@
         return dataReportRequestUrl;
       }
 
-
-
-
-
       /**
        * Navigates to a generated monitor QA/QC report HTML page in a new tab.
        */
@@ -671,8 +679,7 @@
           ? unitIdMatches[1]
           : '';
 
-        console.log(unitId);
-
+        // Determine whether to use the AIRSIS or WRCC service
         let qaqcReportServiceName = '';
         if (dataSource === 'AIRSIS') {
           qaqcReportServiceName = airsisQaqcReportServiceName;
@@ -685,14 +692,15 @@
         // Abort if any required params aren't set
         if (startDate.length == 0 ||
           endDate.length == 0 ||
-          monitorId.length == 0)
+          unitId == null ||
+          unitId.length == 0)
           return null;
         
         // Build query string
         const queryParams = 
           'databaseversion=4.0' +
           '&webserviceapi=4.0' + 
-          '&monitorids=' + monitorId +
+          '&unitid=' + unitId +
           '&startdate=' + startDate +
           '&enddate='   + endDate;
 
@@ -701,8 +709,6 @@
         
         return qaqcReportRequestURL;
       }
-
-
 
       /**
        * Downloads a generated daily average table CSV.
