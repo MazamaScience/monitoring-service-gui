@@ -101,7 +101,12 @@
                 <div id="plot-type-list" class="form-group">
 
                   <div class="form-check">
-                    <input class="form-check-input" type="radio" name="plot-type" value="dailybarplot" checked>
+                    <input class="form-check-input" type="radio" name="plot-type" value="aqilegendadvice" checked>
+                    <label class="form-check-label">Air Quality Index</label>
+                  </div>
+
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="plot-type" value="dailybarplot">
                     <label class="form-check-label">Daily average</label>
                   </div>
 
@@ -242,7 +247,7 @@
       var selectedEndDate = moment().startOf('day').toDate();
       var selectedMonitorProperties = null;
       var selectedMonitorMarker = null;
-      var selectedProductType = 'dailybarplot';
+      var selectedProductType = 'aqilegendadvice';
       
       // ----- Initialize Page -------------------------------------------------
 
