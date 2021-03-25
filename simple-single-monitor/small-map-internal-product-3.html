@@ -123,20 +123,27 @@
               <p class='mb-0'>Other products:</p>
 
               <div>
-
-                <div>
-                  <a id="rawdata-product-link" class="other-product-link mr-4" href="#">
-                    <i class="fas fa-download"></i>
-                    Raw data CSV
-                  </a>
-                </div>
                 
                 <div>
                   <a id="datareport-product-link" class="other-product-link" href="#">
                     <i class="fas fa-external-link-alt"></i>
                     Data report
                   </a>
-                </div>          
+                </div>
+
+                <div>
+                  <a id="qaqcreport-product-link" class="other-product-link" href="#">
+                    <i class="fas fa-external-link-alt"></i>
+                    QA/QC report
+                  </a>
+                </div>
+
+                <div>
+                  <a id="rawdata-product-link" class="other-product-link mr-4" href="#">
+                    <i class="fas fa-download"></i>
+                    Raw data CSV
+                  </a>
+                </div>      
 
               </div>
 
@@ -210,7 +217,7 @@
       // ----- Page State ------------------------------------------------------
 
       // Service for plot products
-      const plotServicePath = 'https://test-c1.airfire.org/monitor-plot/test/';
+      const plotServicePath = 'https://tools.airfire.org/monitor-plot/v4/';
       const plotServiceName = 'plot';
 
       // Service for monitor data products
@@ -222,10 +229,15 @@
       const dataReportServicePath = 'https://tools.airfire.org/monitor-data-report/v4/';
       const dataReportServiceName = 'report';
 
+      // Service for monitor QA/QC report product
+      const qaqcReportServicePath = 'https://tools.airfire.org/monitor-qc-report/v4/';
+      const airsisQaqcReportServiceName = 'airsis';
+      const wrccQaqcReportServiceName = 'wrcc';
+
       // Track the current page input selections
       var selectedStartDate = moment().subtract(10, 'day').startOf('day').toDate();
       var selectedEndDate = moment().startOf('day').toDate();
-      var selectedMonitorId = '';
+      var selectedMonitorProperties = null;
       var selectedMonitorMarker = null;
       var selectedProductType = 'dailybarplot';
       
@@ -292,12 +304,16 @@
         generatePlotProduct();
       });
 
-      $('#rawdata-product-link').click(function() {
-        generateRawDataProduct();
-      });
-
       $('#datareport-product-link').click(function() {
         generateDataReportProduct();
+      });
+
+      $('#qaqcreport-product-link').click(function() {
+        generateQaqcReportProduct();
+      });
+
+      $('#rawdata-product-link').click(function() {
+        generateRawDataProduct();
       });
 
       /**
@@ -472,8 +488,8 @@
           } 
 
           // Update the selected monitor
+          selectedMonitorProperties = monitorFeature.properties;
           selectedMonitorMarker = monitorMarker;
-          selectedMonitorId = monitorId;
 
           // Highlight the selected monitor marker
           selectedMonitorMarker.bringToFront();
@@ -533,10 +549,8 @@
         // Gather query params
         const startDate = dateToYMD(selectedStartDate);
         const endDate   = dateToYMD(selectedEndDate);
-        const monitorId = selectedMonitorId;
+        const monitorId = selectedMonitorProperties.monitorID;
         const plotType = selectedProductType;
-
-        console.log(startDate);
 
         // Abort if any required params aren't set
         if (startDate.length == 0 ||
@@ -580,6 +594,117 @@
       }
 
       /**
+       * Navigates to a generated monitor data report HTML page in a new tab.
+       */
+      function generateDataReportProduct() {
+        $('#page-status-message').text('Generating report...');
+
+        hideErrorBox();
+
+        const dataReportRequestURL = buildDataReportRequestUrl();
+        
+        console.log('Data report request URL: ' + dataReportRequestURL);
+        
+        if (dataReportRequestURL != null) {
+          window.open(dataReportRequestURL, '_blank');
+          $('#page-status-message').text('');
+        }
+      }
+
+      function buildDataReportRequestUrl() {
+        // Gather query params
+        const startDate = dateToYMD(selectedStartDate);
+        const endDate   = dateToYMD(selectedEndDate);
+        const monitorId = selectedMonitorProperties.monitorID;
+
+        // Abort if any required params aren't set
+        if (startDate.length == 0 ||
+          endDate.length == 0 ||
+          monitorId.length == 0)
+          return null;
+        
+        // Build query string
+        const queryParams = 
+          'databaseversion=4.0' +
+          '&webserviceapi=4.0' + 
+          '&monitorids=' + monitorId +
+          '&startdate=' + startDate +
+          '&enddate='   + endDate;
+
+        // Build data report request URL
+        const dataReportRequestUrl = dataReportServicePath + dataReportServiceName + '?' + queryParams;
+        
+        return dataReportRequestUrl;
+      }
+
+
+
+
+
+      /**
+       * Navigates to a generated monitor QA/QC report HTML page in a new tab.
+       */
+      function generateQaqcReportProduct() {
+        $('#page-status-message').text('Generating report...');
+
+        hideErrorBox();
+
+        const qaqcReportRequestURL = buildQaqcReportRequestUrl();
+        
+        console.log('QA/QC report request URL: ' + qaqcReportRequestURL);
+        
+        if (qaqcReportRequestURL != null) {
+          window.open(qaqcReportRequestURL, '_blank');
+          $('#page-status-message').text('');
+        }
+      }
+
+      function buildQaqcReportRequestUrl() {
+        // Gather query params
+        const startDate = dateToYMD(selectedStartDate);
+        const endDate   = dateToYMD(selectedEndDate);
+        const dataSource = selectedMonitorProperties.dataSource;
+
+        const unitIdPattern = /\.(.*$)/gm;
+        const unitIdMatches = unitIdPattern.exec(selectedMonitorProperties.instrumentID);
+        const unitId = (unitIdMatches.length > 1)
+          ? unitIdMatches[1]
+          : '';
+
+        console.log(unitId);
+
+        let qaqcReportServiceName = '';
+        if (dataSource === 'AIRSIS') {
+          qaqcReportServiceName = airsisQaqcReportServiceName;
+        } else if (dataSource === 'WRCC') {
+          qaqcReportServiceName = wrccQaqcReportServiceName;
+        } else {
+          return null;
+        }
+
+        // Abort if any required params aren't set
+        if (startDate.length == 0 ||
+          endDate.length == 0 ||
+          monitorId.length == 0)
+          return null;
+        
+        // Build query string
+        const queryParams = 
+          'databaseversion=4.0' +
+          '&webserviceapi=4.0' + 
+          '&monitorids=' + monitorId +
+          '&startdate=' + startDate +
+          '&enddate='   + endDate;
+
+        // Build data report request URL
+        const qaqcReportRequestURL = qaqcReportServicePath + qaqcReportServiceName + '?' + queryParams;
+        
+        return qaqcReportRequestURL;
+      }
+
+
+
+      /**
        * Downloads a generated daily average table CSV.
        */
       function generateRawDataProduct() {
@@ -609,7 +734,7 @@
        */
       function buildRawDataRequestUrl() {
         // Get query params
-        const monitorId = selectedMonitorId;
+        const monitorId = selectedMonitorProperties.monitorID;
         const startDate = dateToYMD(selectedStartDate);
         const endDate = dateToYMD(selectedEndDate);
 
@@ -649,50 +774,6 @@
       }
 
       /**
-       * Navigates to a generated monitor data report HTML page in a new tab.
-       */
-      function generateDataReportProduct() {
-        $('#page-status-message').text('Generating report...');
-
-        hideErrorBox();
-
-        const dataReportRequestURL = buildDataReportRequestUrl();
-        
-        console.log('Data report request URL: ' + dataReportRequestURL);
-        
-        if (dataReportRequestURL != null) {
-          window.open(dataReportRequestURL, '_blank');
-          $('#page-status-message').text('');
-        }
-      }
-
-      function buildDataReportRequestUrl() {
-        // Gather query params
-        const startDate = dateToYMD(selectedStartDate);
-        const endDate   = dateToYMD(selectedEndDate);
-        const monitorId = selectedMonitorId;
-
-        // Abort if any required params aren't set
-        if (startDate.length == 0 ||
-          endDate.length == 0 ||
-          monitorId.length == 0)
-          return null;
-        
-        // Build query string
-        const queryParams = 
-          'databaseversion=4.0' +
-          '&webserviceapi=4.0' + 
-          '&monitorids=' + monitorId +
-          '&startdate=' + startDate +
-          '&enddate='   + endDate;
-
-        // Build data report request URL
-        const dataReportRequestUrl = dataReportServicePath + dataReportServiceName + '?' + queryParams;
-        
-        return dataReportRequestUrl;
-      }
-
-      /**
        * Handles server side errors by displaying them in an error message box. Some common errors are translated to more user-friendly text.
        * @param error  the error message string from the server
        */
@@ -711,7 +792,7 @@
 
         // Test if the server error string matches a pattern. If so, generate the corresponding error box message
         if (nonexistantMonitorIDPattern.test(stringifiedError)) {
-          errorBoxMessage = 'Could not find monitor with ID: "' + selectedMonitorId + '".';
+          errorBoxMessage = 'Could not find monitor with ID: "' + selectedMonitorProperties.monitorID + '".';
         } else if (multiYearDateRangePattern.test(stringifiedError)) {
           errorBoxMessage = 'Date range cannot span multiple years.';
         } else if (noReadingsInDateRangePattern1.test(stringifiedError) ||
