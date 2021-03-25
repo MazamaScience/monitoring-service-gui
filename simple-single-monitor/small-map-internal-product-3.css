@@ -135,14 +135,16 @@ a.disabled {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   transform-origin: 0% 0%;
   border: 12px solid WhiteSmoke;
-  border-top: 12px solid #007bff;
+  border-right: 12px solid LightGray;
+  border-top: 12px solid LightGray;
+  border-left: 12px solid LightGray;
   border-radius: 50%;
-  animation: spin 0.45s linear infinite;
-  -webkit-animation: spin 0.45s linear infinite; /* Safari */
+  animation: spin 0.7s linear infinite;
+  -webkit-animation: spin 0.7s linear infinite; /* Safari #007bff */
 }
 
 .visible {
