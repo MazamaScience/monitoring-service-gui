@@ -7,7 +7,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name = "author" content = "Mazama Science"/>
   <meta name = "description" content = "An interface that allows users to request archival single-monitor products, such as plots, reports, and raw data."/>
 
@@ -46,178 +46,182 @@
         crossorigin=""/>
   <link rel="stylesheet"
         type="text/css"
-        href="./small-map-internal-product-3.css">
+        href="./smip4.css">
 </head>
 
-<body>
+<body class="container-fluid">
 
-  <!-- ==================== LEFT =========================================== -->
+  <div class="row">
+    
+    <!-- ==================== LEFT =========================================== -->
 
-  <div id="toolbar" class="d-flex flex-column justify-content-between pt-2 pb-2">
+    <div id="toolbar" class="col-lg-4 d-flex flex-column justify-content-between pt-2 pb-2">
 
-    <div class="w-100">
-      
-      <!-- page title -->
-      <div class="d-flex justify-content-between align-items-end">
-        <h1 class="mb-0">Single-Monitor Products</h1>
+      <div class="w-100">
+        
+        <!-- page title -->
+        <div class="d-flex justify-content-between align-items-end">
+          <h1 class="mb-0">Single-Monitor Products</h1>
 
-        <a href="./about.html">About</a>
-      </div>
+          <a href="./about.html">About</a>
+        </div>
 
-      <hr class="w-100">
+        <hr class="w-100">
 
-      <!-- Inputs -->
-      <div id="inputs-section">
+        <!-- Inputs -->
+        <div id="inputs-section">
 
-        <!-- Time range input -->
-        <div class="d-flex align-items-end mb-4">
-          <div class="form-group text-input mr-2 mb-0">
-            <label>1) Select date range</label>
-            <input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
+          <!-- Time range input -->
+          <div class="d-flex align-items-end mb-4">
+            <div class="form-group text-input mr-2 mb-0">
+              <label>1) Select date range</label>
+              <input id="daterange" type="text" class="form-control input-sm" name="daterange" value=""/>
+            </div>
+
+            <button id="update-map-button" class="btn btn-primary" type="button">
+              Update map
+            </button>
           </div>
 
-          <button id="update-map-button" class="btn btn-primary" type="button">
-            Update map
+          <!-- Monitor ID input -->
+          <div class="form-group text-input mb-4">
+            <label>2) Select monitor on map</label>
+            <div id="monitor-map" class="mb-0 rounded"></div>
+             <p id="map-date-range" class="mb-0"></p>
+          </div>
+
+          <!-- Product type selection -->
+          <div id="product-types">
+
+            <label>3) Showing</label>
+
+            <div class="d-flex">
+              
+              <!-- Plot products selection -->
+              <div id="plot-products" class="mr-5">
+
+                  <p class="mb-0">Plots:</p>
+
+                  <div id="plot-type-list" class="form-group">
+
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="plot-type" value="aqilegendadvice" checked>
+                      <label class="form-check-label">Air Quality Index</label>
+                    </div>
+
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="plot-type" value="dailybarplot">
+                      <label class="form-check-label">Daily average</label>
+                    </div>
+
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="plot-type" value="dailybyhour">
+                      <label class="form-check-label">Time of day</label>
+                    </div>
+
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="plot-type" value="timeseries">
+                      <label class="form-check-label">Time series</label>
+                    </div>
+
+                  </div>
+
+              </div>
+              <!-- END plot-products -->
+
+              <!-- Other products selection -->
+              <div id="other-products">
+                
+                <p class="mb-0">Other products:</p>
+
+                <div>
+                  
+                  <div>
+                    <a id="datareport-product-link" class="other-product-link" href="#">
+                      <i class="fas fa-external-link-alt"></i>
+                      Data report
+                    </a>
+                  </div>
+
+                  <div>
+                    <a id="qaqcreport-product-link" class="other-product-link" href="#">
+                      <i class="fas fa-external-link-alt"></i>
+                      QA/QC report
+                    </a>
+                  </div>
+
+                  <div>
+                    <a id="rawdata-product-link" class="other-product-link mr-4" href="#">
+                      <i class="fas fa-download"></i>
+                      Raw data CSV
+                    </a>
+                  </div>      
+
+                </div>
+
+              </div>
+              
+            </div>
+            <!-- END product-types -->
+
+            <p id="page-status-message"></p>     
+
+          </div>
+
+        </div>
+        <!-- END inputs-section -->
+
+      </div>
+
+      <div class="w-100">
+        <hr class="w-100 mt-0">
+        
+        <div id="" class="d-flex justify-content-around w-100">
+
+          <div class="sponsor d-flex flex-column align-items-center">
+            <a href="https://mazamascience.com/">
+              <img src="https://avatars.githubusercontent.com/u/12518709?s=200&v=4">
+            </a>
+            <p class="text-center">Created by <a href="https://mazamascience.com/">Mazama Science</a></p>
+          </div>
+
+          <div class="sponsor d-flex flex-column align-items-center">
+            <a href="https://www.fs.usda.gov/">
+              <img src="http://www.fs.usda.gov/themes/custom/fs_uswds/logo.svg">
+            </a>
+            <p class="text-center">Funded by the <a href="https://www.fs.usda.gov/">US Forest Service</a></p>
+          </div>
+
+        </div>
+
+      </div>
+        
+    </div>
+
+    <!-- ==================== RIGHT ========================================== -->
+
+    <div id="content-area" class="col-lg-8">
+
+      <div id="plot-placeholder">
+
+        <div id="loading-spinner" class="invisible"></div>
+
+        <!-- Error alert box -->
+        <div id="error-box" class="alert alert-danger alert-dismissible invisible">
+          <h1>ERROR</h1>
+
+          <p id="error-box-message"></p>
+
+          <button type="button" class="close" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
-        <!-- Monitor ID input -->
-        <div class="form-group text-input mb-4">
-          <label>2) Select monitor on map</label>
-          <div id="monitor-map" class="mb-0 rounded"></div>
-           <p id="map-date-range" class="mb-0"></p>
-        </div>
-
-        <!-- Product type selection -->
-        <div id="product-types">
-
-          <label>3) Showing</label>
-
-          <div class="d-flex">
-            
-            <!-- Plot products selection -->
-            <div id="plot-products" class="mr-5">
-
-                <p class="mb-0">Plots:</p>
-
-                <div id="plot-type-list" class="form-group">
-
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="plot-type" value="aqilegendadvice" checked>
-                    <label class="form-check-label">Air Quality Index</label>
-                  </div>
-
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="plot-type" value="dailybarplot">
-                    <label class="form-check-label">Daily average</label>
-                  </div>
-
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="plot-type" value="dailybyhour">
-                    <label class="form-check-label">Time of day</label>
-                  </div>
-
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="plot-type" value="timeseries">
-                    <label class="form-check-label">Time series</label>
-                  </div>
-
-                </div>
-
-            </div>
-            <!-- END plot-products -->
-
-            <!-- Other products selection -->
-            <div id="other-products">
-              
-              <p class="mb-0">Other products:</p>
-
-              <div>
-                
-                <div>
-                  <a id="datareport-product-link" class="other-product-link" href="#">
-                    <i class="fas fa-external-link-alt"></i>
-                    Data report
-                  </a>
-                </div>
-
-                <div>
-                  <a id="qaqcreport-product-link" class="other-product-link" href="#">
-                    <i class="fas fa-external-link-alt"></i>
-                    QA/QC report
-                  </a>
-                </div>
-
-                <div>
-                  <a id="rawdata-product-link" class="other-product-link mr-4" href="#">
-                    <i class="fas fa-download"></i>
-                    Raw data CSV
-                  </a>
-                </div>      
-
-              </div>
-
-            </div>
-            
-          </div>
-          <!-- END product-types -->
-
-          <p id="page-status-message"></p>     
-
-        </div>
-
-      </div>
-      <!-- END inputs-section -->
-
-    </div>
-
-    <div class="w-100">
-      <hr class="w-100 mt-0">
-      
-      <div id="" class="d-flex justify-content-around w-100">
-
-        <div class="sponsor d-flex flex-column align-items-center">
-          <a href="https://mazamascience.com/">
-            <img src="https://avatars.githubusercontent.com/u/12518709?s=200&v=4">
-          </a>
-          <p>Created by <a href="https://mazamascience.com/">Mazama Science</a></p>
-        </div>
-
-        <div class="sponsor d-flex flex-column align-items-center">
-          <a href="https://www.fs.usda.gov/">
-            <img src="http://www.fs.usda.gov/themes/custom/fs_uswds/logo.svg">
-          </a>
-          <p>Funded by the <a href="https://www.fs.usda.gov/">US Forest Service</a></p>
-        </div>
-
       </div>
 
-    </div>
-      
-  </div>
-
-  <!-- ==================== RIGHT ========================================== -->
-
-  <div id="content-area">
-
-    <div id="plot-placeholder">
-
-      <div id="loading-spinner" class="invisible"></div>
-
-      <!-- Error alert box -->
-      <div id="error-box" class="alert alert-danger alert-dismissible invisible">
-        <h1>ERROR</h1>
-
-        <p id="error-box-message"></p>
-
-        <button type="button" class="close" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+      <img id="plot-image" class="invisible" src="#" alt="Plot image">
 
     </div>
-
-    <img id="plot-image" class="invisible" src="#" alt="Plot image">
 
   </div>
 
