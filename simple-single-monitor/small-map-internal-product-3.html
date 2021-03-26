@@ -563,7 +563,7 @@
       }
 
       /**
-       * Builds a URL request to the plot service using form input.
+       * Builds a URL request to the plot service.
        */
       function buildPlotRequestUrl() {
         // Gather query params
@@ -631,6 +631,9 @@
         }
       }
 
+      /**
+       * Builds a URL request to the data report service.
+       */
       function buildDataReportRequestUrl() {
         // Gather query params
         const startDate = dateToYMD(selectedStartDate);
@@ -675,6 +678,9 @@
         }
       }
 
+      /**
+       * Builds a URL request to the QA/QC report service.
+       */
       function buildQaqcReportRequestUrl() {
         // Gather query params
         const startDate = dateToYMD(selectedStartDate);
@@ -723,7 +729,7 @@
       }
 
       /**
-       * Downloads a generated daily average table CSV.
+       * Downloads a raw data CSV.
        */
       function generateRawDataProduct() {
         $('#page-status-message').text('Generating daily average table...');
@@ -748,7 +754,7 @@
       }
 
       /**
-       * Builds a URL request to the daily average table service using form input.
+       * Builds a URL request to the raw data service.
        */
       function buildRawDataRequestUrl() {
         // Get query params
@@ -793,7 +799,7 @@
 
       /**
        * Handles server side errors by displaying them in an error message box. Some common errors are translated to more user-friendly text.
-       * @param error  the error message string from the server
+       * @param serverErrorString  the error message string from the server
        */
       function handleServerError(serverErrorString) {
         // Define regex test patterns for common server-side errors
