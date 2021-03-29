@@ -93,7 +93,6 @@ a.disabled {
 
 #content-area {
   padding: 30px;
-  flex-grow: 1;
   z-index: 1;
 }
 
