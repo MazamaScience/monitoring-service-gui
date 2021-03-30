@@ -379,8 +379,13 @@
 
         console.log('GeoJSON request URL: ' + monitorsGeoJsonRequestUrl);
 
+        // Clear the currently selected monitor metadata
+        const prevSelectedMonitorId = (selectedMonitorProperties != null) ? selectedMonitorProperties.monitorID : null;
+        selectedMonitorProperties = null;
+        selectedMonitorMarker = null;
+
         // Add monitor markers to the map
-        addMonitorMarkers(monitorsGeoJsonRequestUrl);
+        addMonitorMarkers(monitorsGeoJsonRequestUrl, prevSelectedMonitorId);
 
         // Format the selected date range
         const startDate = moment(selectedStartDate, 'MM/DD/YYYY').format('YYYY-MM-DD'); 
@@ -422,8 +427,9 @@
       /**
        * Fetches and loads a GeoJSON file of monitor features from AirFire, then displays them on the map as markers.
        * @param monitorsGeoJsonRequestUrl  the URL request for the monitors GeoJSON file
+       * @param prevSelectedMonitorId  the ID of the previously selected monitor
        */
-      function addMonitorMarkers(monitorsGeoJsonRequestUrl) {
+      function addMonitorMarkers(monitorsGeoJsonRequestUrl, prevSelectedMonitorId) {
         fetch(monitorsGeoJsonRequestUrl, { mode: 'cors' })
           .then(response => response.json())
           .then(data => {
@@ -434,8 +440,11 @@
 
             // Create and add a marker for each monitor feature
             L.geoJSON(data, {
-                onEachFeature: createMonitorMarker
+              onEachFeature: createMonitorMarker(prevSelectedMonitorId)
             });
+
+            // If a monitor marker is selected during the update, make sure it is drawn in front of the rest
+            if (selectedMonitorMarker) selectedMonitorMarker.bringToFront();
 
             $('#page-status-message').text('');
           })
@@ -446,55 +455,86 @@
       }
 
       /**
-       * Creates an interactive marker for a monitor GeoJSON feature and add it to the map.
+       * Creates an interactive marker for a monitor GeoJSON feature and adds it to the map.
+       * @param prevSelectedMonitorId  the ID of the previously selected monitor
        * @param monitorFeature  a monitor's GeoJSON feature description
-       * @param layer  default marker layer provided for the monitorFeature (ignored)
+       * @param layer  default marker layer provided for the monitorFeature (unused)
        */
-      function createMonitorMarker(monitorFeature, layer) {
-        // Abort if the feature doesn't have a monitor ID
-        if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) return;
+      function createMonitorMarker(prevSelectedMonitorId) {
+        return function(monitorFeature, layer) {
+          // Abort if the feature doesn't have a monitor ID
+          if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) return;
 
-        // Get monitor ID and site name
-        const monitorId = monitorFeature.properties.monitorID;
-        const siteName = monitorFeature.properties.siteName;
+          // Get monitor ID and site name
+          const monitorId = monitorFeature.properties.monitorID;
+          const siteName = monitorFeature.properties.siteName;
 
-        // Get monitor coordinates
-        const coords = monitorFeature.geometry.coordinates;
-        const lon = coords[0];
-        const lat = coords[1];
+          // Get monitor coordinates
+          const coords = monitorFeature.geometry.coordinates;
+          const lon = coords[0];
+          const lat = coords[1];
 
-        // Determine marker shape
-        const dataSource = monitorFeature.properties.dataSource;
-        const shape = (dataSource.includes('AIRNOW') || dataSource.includes('EPA'))
-          ? 'circle'
-          : 'triangle';
+          // Determine marker shape
+          const dataSource = monitorFeature.properties.dataSource;
+          const shape = (dataSource.includes('AIRNOW') || dataSource.includes('EPA'))
+            ? 'circle'
+            : 'triangle';
 
-        // Create a marker for the monitor
-        var monitorMarker = L.shapeMarker([lat, lon], {
-          shape: shape,
-          radius: 6,
-          color: '#0037aa',
-          fillColor: '#007bff',
-          fillOpacity: 0.8,
-          weight: 1.6
-        });
+          // Create a marker for the monitor
+          var monitorMarker = L.shapeMarker([lat, lon], {
+            shape: shape,
+            radius: 6,
+            color: '#0037aa',
+            fillColor: '#007bff',
+            fillOpacity: 0.8,
+            weight: 1.6
+          });
 
-        // Open a popup when the marker is hovered over
-        monitorMarker.on('mouseover', function(e) {
-          var popup = 
-            L.popup({autoPan: false})
-            .setLatLng(e.latlng) 
-              .setContent('<b>' + siteName + '</b><br>' + monitorId)
-              .openOn(monitorMap);
-        });
+          // Open a popup when the marker is hovered over
+          monitorMarker.on('mouseover', function(e) {
+            var popup = 
+              L.popup({autoPan: false})
+              .setLatLng(e.latlng) 
+                .setContent('<b>' + siteName + '</b><br>' + monitorId)
+                .openOn(monitorMap);
+          });
 
-        // Close the popup when the marker is not hovered over
-        monitorMarker.on('mouseout', function(e) {
-          monitorMap.closePopup();
-        });
+          // Close the popup when the marker is not hovered over
+          monitorMarker.on('mouseout', function(e) {
+            monitorMap.closePopup();
+          });
 
-        // React when the marker is clicked
-        monitorMarker.on('click', function(e) {
+          // React when the marker is clicked
+          monitorMarker.on('click', clickMonitorMarker(monitorFeature, monitorMarker));
+
+          // If the marker is the same as the one previously selected (before
+          // the map update) set it as the current selected monitor
+          if (monitorId === prevSelectedMonitorId) {
+            selectMonitorMarker(monitorFeature, monitorMarker);
+          }
+
+          // Add the marker to the markers layer
+          monitorMarker.addTo(monitorMarkersLayerGroup);
+        }
+
+        /**
+         * Selects a monitor marker when it is clicked.
+         * @param monitorFeature  a monitor's GeoJSON feature description
+         * @param layer  default marker layer provided for the monitorFeature (unused)
+         * @param e  click event (unused)
+         */
+        function clickMonitorMarker(monitorFeature, monitorMarker) {
+          return function(e) {
+            selectMonitorMarker(monitorFeature, monitorMarker);
+          };
+        }
+
+        /**
+         * Selects a monitor marker.
+         * @param monitorFeature  a monitor's GeoJSON feature description
+         * @param layer  default marker layer provided for the monitorFeature (unused)
+         */
+        function selectMonitorMarker(monitorFeature, monitorMarker) {
           // Un-highlight the previously selected marker
           if (selectedMonitorMarker != null) {
             selectedMonitorMarker.setStyle({
@@ -527,10 +567,7 @@
           }
 
           generatePlotProduct();
-        });
-
-        // Add the marker to the markers layer
-        monitorMarker.addTo(monitorMarkersLayerGroup);
+        }
       }
 
       // ----- Other Functions -------------------------------------------------
@@ -573,15 +610,15 @@
         // Gather query params
         const startDate = dateToYMD(selectedStartDate);
         const endDate   = dateToYMD(selectedEndDate);
-        const monitorId = selectedMonitorProperties.monitorID;
-        const monitorTimezone = selectedMonitorProperties.timezone.replace(/\\"/g, '"');
+        const monitorId = (selectedMonitorProperties) ? selectedMonitorProperties.monitorID : null;
+        const monitorTimezone = (selectedMonitorProperties) ? selectedMonitorProperties.timezone.replace(/\\"/g, '"') : null;
         const plotType = selectedProductType;
 
         // Abort if any required params aren't set
         if (startDate.length == 0 ||
           endDate.length == 0 ||
-          monitorId.length == 0 ||
-          monitorTimezone.length == 0 ||
+          monitorId == null ||
+          monitorTimezone == null ||
           plotType.length == 0)
           return null;
         
