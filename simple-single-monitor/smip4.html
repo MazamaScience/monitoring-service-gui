@@ -269,8 +269,8 @@
         selectedEndDate = end;
       });
 
-      // Hide the QA/QC report product link by default
-      $('#qaqcreport-product-link').hide();
+      // Disable the QA/QC report product link by default
+      $('#qaqcreport-product-link').addClass('disabled');
       
       // Create the Leaflet map centered on the continental US
       var monitorMap = L.map('monitor-map', {
@@ -559,11 +559,10 @@
           $('.form-check-input').prop('disabled', false);
           $('.other-product-link').removeClass('disabled');
 
+          // Disable the QA/QC report link if the monitor data source is AIRNOW or EPA
           if (selectedMonitorProperties.dataSource.includes('AIRNOW') ||
             selectedMonitorProperties.dataSource.includes('EPA')) {
-            $('#qaqcreport-product-link').hide();
-          } else {
-            $('#qaqcreport-product-link').show();
+            $('#qaqcreport-product-link').addClass('disabled');
           }
 
           generatePlotProduct();
