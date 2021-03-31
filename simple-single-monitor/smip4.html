@@ -747,17 +747,17 @@
         const endDate   = dateToYMD(selectedEndDate);
         const dataSource = selectedMonitorProperties.dataSource;
 
+        // Determine unit ID
         const unitIdPattern = /\.(.*$)/gm;
         const unitIdMatches = unitIdPattern.exec(selectedMonitorProperties.instrumentID);
         const unitId = (unitIdMatches.length > 1)
           ? unitIdMatches[1]
-          : '';
+          : null;
 
         // Abort if any required params for both services aren't set
         if (startDate.length == 0 ||
           endDate.length == 0 ||
-          unitId == null ||
-          unitId.length == 0)
+          unitId == null)
           return null;
         
         // Build query string for both services
@@ -768,14 +768,19 @@
           '&startdate=' + startDate +
           '&enddate='   + endDate;
 
-        // Determine whether to use the AIRSIS or WRCC service
+        // Determine which service to use
         let qaqcReportServiceName = '';
         if (dataSource === 'AIRSIS') {
-          qaqcReportServiceName = airsisQaqcReportServiceName;
-          
-          let provider = 'usfs'; // TODO: extract provider from instrumentId
-          if (provider == null || provider.length == 0) return null; 
+          // Determine AIRSIS provider
+          const providerPattern = /(^.*)\./gm;
+          const providerMatches = providerPattern.exec(selectedMonitorProperties.instrumentID);
+          const provider = (providerMatches.length > 1)
+            ? providerMatches[1]
+            : null;
+          if (provider == null) return null;
           queryParams += '&provider=' + provider;
+
+          qaqcReportServiceName = airsisQaqcReportServiceName;
         } else if (dataSource === 'WRCC') {
           qaqcReportServiceName = wrccQaqcReportServiceName;
         } else {
