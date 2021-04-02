@@ -144,7 +144,7 @@
                   </div>
 
                   <div>
-                    <a id="qaqcreport-product-link" class="other-product-link" href="#">
+                    <a id="qcreport-product-link" class="other-product-link" href="#">
                       <i class="fas fa-external-link-alt"></i>
                       QC report
                     </a>
@@ -244,7 +244,7 @@
       const dataReportServiceName = 'report';
 
       // Service for monitor QC report product
-      const qaqcReportServicePath = 'https://tools.airfire.org/monitor-qc-report/v4/';
+      const qcReportServicePath = 'https://tools.airfire.org/monitor-qc-report/v4/';
       const airsisQCReportServiceName = 'airsis';
       const wrccQCReportServiceName = 'wrcc';
 
@@ -269,8 +269,8 @@
         selectedEndDate = end;
       });
 
-      // Hide the QC report product link by default
-      $('#qaqcreport-product-link').hide();
+      // Disable the QC report product link by default
+      $('#qcreport-product-link').addClass('disabled');
       
       // Create the Leaflet map centered on the continental US
       var monitorMap = L.map('monitor-map', {
@@ -325,7 +325,7 @@
         generateDataReportProduct();
       });
 
-      $('#qaqcreport-product-link').click(function() {
+      $('#qcreport-product-link').click(function() {
         generateQCReportProduct();
       });
 
@@ -379,8 +379,15 @@
 
         console.log('GeoJSON request URL: ' + monitorsGeoJsonRequestUrl);
 
+        // Clear the currently selected monitor metadata
+        const prevSelectedMonitorId = (selectedMonitorProperties)
+          ? selectedMonitorProperties.monitorID
+          : null;
+        selectedMonitorProperties = null;
+        selectedMonitorMarker = null;
+
         // Add monitor markers to the map
-        addMonitorMarkers(monitorsGeoJsonRequestUrl);
+        addMonitorMarkers(monitorsGeoJsonRequestUrl, prevSelectedMonitorId);
 
         // Format the selected date range
         const startDate = moment(selectedStartDate, 'MM/DD/YYYY').format('YYYY-MM-DD'); 
@@ -414,7 +421,10 @@
           '&enddate=' + endDate;
 
         // Build GeoJSON request URL
-        const monitorsGeoJsonRequestUrl = dataServicePath + geoJsonServiceName + '?' + queryParams;
+        const monitorsGeoJsonRequestUrl =
+          dataServicePath +
+          geoJsonServiceName +
+          '?' + queryParams;
 
         return monitorsGeoJsonRequestUrl;
       }
@@ -422,8 +432,9 @@
       /**
        * Fetches and loads a GeoJSON file of monitor features from AirFire, then displays them on the map as markers.
        * @param monitorsGeoJsonRequestUrl  the URL request for the monitors GeoJSON file
+       * @param prevSelectedMonitorId  the ID of the previously selected monitor
        */
-      function addMonitorMarkers(monitorsGeoJsonRequestUrl) {
+      function addMonitorMarkers(monitorsGeoJsonRequestUrl, prevSelectedMonitorId) {
         fetch(monitorsGeoJsonRequestUrl, { mode: 'cors' })
           .then(response => response.json())
           .then(data => {
@@ -434,8 +445,11 @@
 
             // Create and add a marker for each monitor feature
             L.geoJSON(data, {
-                onEachFeature: createMonitorMarker
+              onEachFeature: createMonitorMarker(prevSelectedMonitorId)
             });
+
+            // If a monitor marker is selected during the update, make sure it is drawn in front of the rest
+            if (selectedMonitorMarker) selectedMonitorMarker.bringToFront();
 
             $('#page-status-message').text('');
           })
@@ -446,55 +460,86 @@
       }
 
       /**
-       * Creates an interactive marker for a monitor GeoJSON feature and add it to the map.
+       * Creates an interactive marker for a monitor GeoJSON feature and adds it to the map.
+       * @param prevSelectedMonitorId  the ID of the previously selected monitor
        * @param monitorFeature  a monitor's GeoJSON feature description
-       * @param layer  default marker layer provided for the monitorFeature (ignored)
+       * @param layer  default marker layer provided for the monitorFeature (unused)
        */
-      function createMonitorMarker(monitorFeature, layer) {
-        // Abort if the feature doesn't have a monitor ID
-        if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) return;
+      function createMonitorMarker(prevSelectedMonitorId) {
+        return function(monitorFeature, layer) {
+          // Abort if the feature doesn't have a monitor ID
+          if (!(monitorFeature.properties && monitorFeature.properties.monitorID)) return;
 
-        // Get monitor ID and site name
-        const monitorId = monitorFeature.properties.monitorID;
-        const siteName = monitorFeature.properties.siteName;
+          // Get monitor ID and site name
+          const monitorId = monitorFeature.properties.monitorID;
+          const siteName = monitorFeature.properties.siteName;
 
-        // Get monitor coordinates
-        const coords = monitorFeature.geometry.coordinates;
-        const lon = coords[0];
-        const lat = coords[1];
+          // Get monitor coordinates
+          const coords = monitorFeature.geometry.coordinates;
+          const lon = coords[0];
+          const lat = coords[1];
 
-        // Determine marker shape
-        const dataSource = monitorFeature.properties.dataSource;
-        const shape = (dataSource.includes('AIRNOW') || dataSource.includes('EPA'))
-          ? 'circle'
-          : 'triangle';
+          // Determine marker shape
+          const dataSource = monitorFeature.properties.dataSource;
+          const shape = (dataSource.includes('AIRNOW') || dataSource.includes('EPA'))
+            ? 'circle'
+            : 'triangle';
 
-        // Create a marker for the monitor
-        var monitorMarker = L.shapeMarker([lat, lon], {
-          shape: shape,
-          radius: 6,
-          color: '#0037aa',
-          fillColor: '#007bff',
-          fillOpacity: 0.8,
-          weight: 1.6
-        });
+          // Create a marker for the monitor
+          var monitorMarker = L.shapeMarker([lat, lon], {
+            shape: shape,
+            radius: 6,
+            color: '#0037aa',
+            fillColor: '#007bff',
+            fillOpacity: 0.8,
+            weight: 1.6
+          });
 
-        // Open a popup when the marker is hovered over
-        monitorMarker.on('mouseover', function(e) {
-          var popup = 
-            L.popup({autoPan: false})
-            .setLatLng(e.latlng) 
-              .setContent('<b>' + siteName + '</b><br>' + monitorId)
-              .openOn(monitorMap);
-        });
+          // Open a popup when the marker is hovered over
+          monitorMarker.on('mouseover', function(e) {
+            var popup = 
+              L.popup({autoPan: false})
+              .setLatLng(e.latlng) 
+                .setContent('<b>' + siteName + '</b><br>' + monitorId)
+                .openOn(monitorMap);
+          });
 
-        // Close the popup when the marker is not hovered over
-        monitorMarker.on('mouseout', function(e) {
-          monitorMap.closePopup();
-        });
+          // Close the popup when the marker is not hovered over
+          monitorMarker.on('mouseout', function(e) {
+            monitorMap.closePopup();
+          });
 
-        // React when the marker is clicked
-        monitorMarker.on('click', function(e) {
+          // React when the marker is clicked
+          monitorMarker.on('click', clickMonitorMarker(monitorFeature, monitorMarker));
+
+          // If the marker is the same as the one previously selected (before
+          // the map update) set it as the current selected monitor
+          if (monitorId === prevSelectedMonitorId) {
+            selectMonitorMarker(monitorFeature, monitorMarker);
+          }
+
+          // Add the marker to the markers layer
+          monitorMarker.addTo(monitorMarkersLayerGroup);
+        }
+
+        /**
+         * Selects a monitor marker when it is clicked.
+         * @param monitorFeature  a monitor's GeoJSON feature description
+         * @param layer  default marker layer provided for the monitorFeature (unused)
+         * @param e  click event (unused)
+         */
+        function clickMonitorMarker(monitorFeature, monitorMarker) {
+          return function(e) {
+            selectMonitorMarker(monitorFeature, monitorMarker);
+          };
+        }
+
+        /**
+         * Selects a monitor marker.
+         * @param monitorFeature  a monitor's GeoJSON feature description
+         * @param layer  default marker layer provided for the monitorFeature (unused)
+         */
+        function selectMonitorMarker(monitorFeature, monitorMarker) {
           // Un-highlight the previously selected marker
           if (selectedMonitorMarker != null) {
             selectedMonitorMarker.setStyle({
@@ -519,18 +564,14 @@
           $('.form-check-input').prop('disabled', false);
           $('.other-product-link').removeClass('disabled');
 
+          // Disable the QA/QC report link if the monitor data source is AIRNOW or EPA
           if (selectedMonitorProperties.dataSource.includes('AIRNOW') ||
             selectedMonitorProperties.dataSource.includes('EPA')) {
-            $('#qaqcreport-product-link').hide();
-          } else {
-            $('#qaqcreport-product-link').show();
+            $('#qcreport-product-link').addClass('disabled');
           }
 
           generatePlotProduct();
-        });
-
-        // Add the marker to the markers layer
-        monitorMarker.addTo(monitorMarkersLayerGroup);
+        }
       }
 
       // ----- Other Functions -------------------------------------------------
@@ -554,7 +595,7 @@
         $('#plot-placeholder').addClass('visible');
 
         
-        if (plotRequestUrl != null) {
+        if (plotRequestUrl) {
           $('#page-status-message').text('Generating plot...');
 
           // Update plot image source
@@ -573,15 +614,19 @@
         // Gather query params
         const startDate = dateToYMD(selectedStartDate);
         const endDate   = dateToYMD(selectedEndDate);
-        const monitorId = selectedMonitorProperties.monitorID;
-        const monitorTimezone = selectedMonitorProperties.timezone.replace(/\\"/g, '"');
-        const plotType = selectedPlotType;
+        const monitorId = (selectedMonitorProperties)
+          ? selectedMonitorProperties.monitorID
+          : null;
+        const monitorTimezone = (selectedMonitorProperties)
+          ? selectedMonitorProperties.timezone.replace(/\\"/g, '"')
+          : null;
+        const plotType = selectedProductType;
 
         // Abort if any required params aren't set
         if (startDate.length == 0 ||
           endDate.length == 0 ||
-          monitorId.length == 0 ||
-          monitorTimezone.length == 0 ||
+          monitorId == null ||
+          monitorTimezone == null ||
           plotType.length == 0)
           return null;
         
@@ -596,10 +641,15 @@
           '&timezone=' + monitorTimezone;
 
         // Build plot image request URL
-        const plotRequestURL = plotServicePath + plotServiceName + '?' + queryParams;
+        const plotRequestURL =
+          plotServicePath +
+          plotServiceName +
+          '?' + queryParams;
         
         // Build plot JSON request URL
-        const jsonRequestURL = plotRequestURL + '&responsetype=json';
+        const jsonRequestURL =
+          plotRequestURL +
+          '&responsetype=json';
         
         // Request the JSON response first to check for server-side errors
         fetch(jsonRequestURL, { mode: 'cors' })
@@ -632,7 +682,7 @@
         
         console.log('Data report request URL: ' + dataReportRequestURL);
         
-        if (dataReportRequestURL != null) {
+        if (dataReportRequestURL) {
           window.open(dataReportRequestURL, '_blank');
           $('#page-status-message').text('');
         }
@@ -662,7 +712,10 @@
           '&enddate='   + endDate;
 
         // Build data report request URL
-        const dataReportRequestUrl = dataReportServicePath + dataReportServiceName + '?' + queryParams;
+        const dataReportRequestUrl =
+          dataReportServicePath +
+          dataReportServiceName +
+          '?' + queryParams;
         
         return dataReportRequestUrl;
       }
@@ -675,12 +728,12 @@
 
         hideErrorBox();
 
-        const qaqcReportRequestURL = buildQCReportRequestUrl();
+        const qcReportRequestURL = buildQCReportRequestUrl();
         
-        console.log('QC report request URL: ' + qaqcReportRequestURL);
+        console.log('QC report request URL: ' + qcReportRequestURL);
         
-        if (qaqcReportRequestURL != null) {
-          window.open(qaqcReportRequestURL, '_blank');
+        if (qcReportRequestURL) {
+          window.open(qcReportRequestURL, '_blank');
           $('#page-status-message').text('');
         }
       }
@@ -694,17 +747,17 @@
         const endDate   = dateToYMD(selectedEndDate);
         const dataSource = selectedMonitorProperties.dataSource;
 
+        // Determine unit ID
         const unitIdPattern = /\.(.*$)/gm;
         const unitIdMatches = unitIdPattern.exec(selectedMonitorProperties.instrumentID);
         const unitId = (unitIdMatches.length > 1)
           ? unitIdMatches[1]
-          : '';
+          : null;
 
         // Abort if any required params for both services aren't set
         if (startDate.length == 0 ||
           endDate.length == 0 ||
-          unitId == null ||
-          unitId.length == 0)
+          unitId == null)
           return null;
         
         // Build query string for both services
@@ -715,24 +768,32 @@
           '&startdate=' + startDate +
           '&enddate='   + endDate;
 
-        // Determine whether to use the AIRSIS or WRCC service
-        let qaqcReportServiceName = '';
+        // Determine which service to use
+        let qcReportServiceName = '';
         if (dataSource === 'AIRSIS') {
-          qaqcReportServiceName = airsisQCReportServiceName;
-          
-          let provider = 'usfs'; // TODO: extract provider from instrumentId
-          if (provider == null || provider.length == 0) return null; 
+          // Determine AIRSIS provider
+          const providerPattern = /(^.*)\./gm;
+          const providerMatches = providerPattern.exec(selectedMonitorProperties.instrumentID);
+          const provider = (providerMatches.length > 1)
+            ? providerMatches[1]
+            : null;
+          if (provider == null) return null;
           queryParams += '&provider=' + provider;
+
+          qcReportServiceName = airsisQCReportServiceName;
         } else if (dataSource === 'WRCC') {
-          qaqcReportServiceName = wrccQCReportServiceName;
+          qcReportServiceName = wrccQCReportServiceName;
         } else {
           return null;
         }
 
-        // Build QC report request URL
-        const qaqcReportRequestURL = qaqcReportServicePath + qaqcReportServiceName + '?' + queryParams;
+        // Build QA/QC report request URL
+        const qcReportRequestURL =
+          qcReportServicePath +
+          qcReportServiceName +
+          '?' + queryParams;
         
-        return qaqcReportRequestURL;
+        return qcReportRequestURL;
       }
 
       /**
@@ -743,15 +804,16 @@
 
         hideErrorBox();
 
-        const tableRequestURL = buildRawDataRequestUrl();
+        const rawDataRequestURL = buildRawDataRequestUrl();
         
-        console.log('Daily average table request URL: ' + tableRequestURL);
+        console.log('Raw data request URL: ' + rawDataRequestURL);
         
-        if (tableRequestURL != null) {
-          // Create a temporary download link, programatically click it, and then remove it frome the page
+        if (rawDataRequestURL) {
+          // Create a temporary download link, programatically click it,
+          // then remove it from the page
           var link = document.createElement('a');
           link.setAttribute('download', '');
-          link.href = tableRequestURL;
+          link.href = rawDataRequestURL;
           document.body.appendChild(link);
           link.click();
           link.remove();
@@ -778,7 +840,10 @@
           '&outputfiletype=csv';
 
         // Build product request URL
-        const productRequestUrl = dataServicePath + rawDataServiceName + '?' + queryParams;
+        const productRequestUrl =
+          dataServicePath +
+          rawDataServiceName +
+          '?' + queryParams;
 
         // Build product json request URL
         const jsonRequestUrl = productRequestUrl + '&responsetype=json';
@@ -805,7 +870,8 @@
       }
 
       /**
-       * Handles server side errors by displaying them in an error message box. Some common errors are translated to more user-friendly text.
+       * Handles server side errors by displaying them in an error message box.
+       * Some common errors are translated to more user-friendly text.
        * @param serverErrorString  the error message string from the server
        */
       function handleServerError(serverErrorString) {
@@ -849,6 +915,9 @@
         // Hide loading spinner
         $('#loading-spinner').removeClass('visible');
         $('#loading-spinner').addClass('invisible');
+
+        // Clear page status message
+        $('#page-status-message').text('');
       }
 
       /**
