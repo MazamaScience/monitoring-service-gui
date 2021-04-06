@@ -620,7 +620,7 @@
         const monitorTimezone = (selectedMonitorProperties)
           ? selectedMonitorProperties.timezone.replace(/\\"/g, '"')
           : null;
-        const plotType = selectedProductType;
+        const plotType = selectedPlotType;
 
         // Abort if any required params aren't set
         if (startDate.length == 0 ||
